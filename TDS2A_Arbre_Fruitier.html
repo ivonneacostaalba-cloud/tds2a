@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1B5E20">
+<title>TDS2A — Arbre Fruitier</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --gd:#1B5E20;--gm:#388E3C;--gp:#E8F5E9;--gl:#C8E6C9;
+  --rd:#C62828;--rdl:#FFEBEE;--am:#E65100;--aml:#FFF3E0;
+  --bg:#EEF1EC;--card:#fff;--bdr:#DDE3DA;
+  --txt:#1C1F1A;--mut:#5A6358;--hint:#8A9488;
+  --r:12px;--ri:8px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding-bottom:92px}
+.app{max-width:560px;margin:0 auto}
+
+/* TOP BAR */
+.top{background:var(--gd);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.top-info{flex:1}
+.top-info h1{font-size:13px;font-weight:600;line-height:1.3}
+.top-info p{font-size:10px;opacity:.7;margin-top:1px}
+.tbtn{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:7px;padding:6px 11px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.tbtn:active{background:rgba(255,255,255,.32)}
+.tbtn.sv{background:rgba(255,255,255,.28)}
+
+/* PROGRESS */
+.prog{height:3px;background:rgba(255,255,255,.2)}
+.pf{height:100%;background:#fff;transition:width .35s}
+
+/* TABS */
+.tabs{display:flex;gap:3px;overflow-x:auto;padding:8px 12px 7px;background:var(--gd);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:5px 10px;border-radius:18px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:rgba(255,255,255,.14);color:rgba(255,255,255,.6);white-space:nowrap;transition:all .15s}
+.tab.active{background:#fff;color:var(--gd)}
+.tab.done{background:rgba(255,255,255,.28);color:#fff}
+
+/* CARDS */
+.cnt{padding:12px 14px}
+.card{background:var(--card);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;border:1px solid var(--bdr);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.ct{font-size:10px;font-weight:700;color:var(--mut);margin-bottom:13px;text-transform:uppercase;letter-spacing:.06em}
+.ct-desc{font-size:11px;color:var(--mut);font-style:italic;font-weight:400;margin-top:4px;margin-bottom:12px;line-height:1.5;padding:8px 10px;background:var(--bg);border-radius:6px;border-left:3px solid var(--gm)}
+
+/* FIELDS */
+.f{margin-bottom:13px}
+.f:last-child{margin-bottom:0}
+.f>label{display:block;font-size:13px;color:var(--txt);margin-bottom:6px;font-weight:500;line-height:1.4}
+.f>label .req{color:var(--rd);margin-left:3px}
+.f>label .nsp-note{font-size:11px;color:var(--hint);font-weight:400;display:block;margin-top:2px}
+input[type=text],input[type=number],input[type=date],select,textarea{
+  width:100%;font-size:15px;padding:11px 13px;border-radius:var(--ri);
+  border:1.5px solid var(--bdr);background:#fff;color:var(--txt);
+  -webkit-appearance:none;font-family:inherit;transition:border-color .15s;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gm);box-shadow:0 0 0 3px rgba(56,142,60,.12)}
+textarea{min-height:76px;resize:vertical;line-height:1.5}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+/* RADIO BUTTONS */
+.rg{display:flex;gap:7px;flex-wrap:wrap;margin-top:2px}
+.rb{padding:9px 14px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--bdr);background:#fafafa;color:var(--txt);transition:all .15s;line-height:1}
+.rb.on{background:var(--gp);border-color:var(--gm);color:var(--gd);font-weight:600}
+.rb:active{transform:scale(.97)}
+
+/* CHECKBOXES (multi-select) */
+.cg{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.cb-btn{padding:8px 12px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--bdr);background:#fafafa;color:var(--txt);transition:all .15s;display:flex;align-items:center;gap:6px}
+.cb-btn.on{background:var(--gp);border-color:var(--gm);color:var(--gd);font-weight:600}
+
+/* INFO BOXES */
+.info{background:var(--gp);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--mut);margin-bottom:12px;display:flex;gap:8px;border-left:3px solid var(--gm);line-height:1.5}
+.info-warn{background:#FFF8E1;border-left-color:#F57F17;color:#5D4037}
+.info-pain{background:var(--aml);border-left-color:var(--am);color:#BF360C}
+.info-ref{background:#EDE7F6;border-left-color:#6A1B9A;color:#4A148C;font-style:italic}
+
+/* SECTION LABELS */
+.slbl{font-size:10px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--bdr)}
+
+/* OPTIONAL SECTION */
+.opt-toggle{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:8px;background:var(--bg);border:1.5px dashed var(--bdr);cursor:pointer;font-size:12px;font-weight:600;color:var(--mut);margin:10px 0 0;transition:all .15s}
+.opt-toggle:active{background:var(--gp)}
+.opt-section{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr)}
+.opt-section.open{display:block}
+
+/* PRODUCT BLOCKS */
+.prod-block{border:1px solid var(--bdr);border-radius:9px;padding:12px 14px;margin-bottom:10px;background:#FAFBFA}
+.prod-title{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.prod-tabs{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}
+.prod-tab{padding:5px 12px;border-radius:14px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--bdr);background:#fff;color:var(--mut);transition:all .15s}
+.prod-tab.active{background:var(--gd);color:#fff;border-color:var(--gd)}
+
+/* CALENDAR */
+.cal-ops{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+.cal-op{padding:5px 10px;border-radius:14px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid;transition:all .15s;opacity:.5}
+.cal-op.sel{opacity:1}
+.cal-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.cal-m{padding:8px 3px;font-size:11px;font-weight:600;text-align:center;border-radius:6px;cursor:pointer;border:1.5px solid var(--bdr);background:#fafafa;color:var(--mut);transition:all .15s;line-height:1.3}
+
+/* RANGE */
+.range-wrap{display:flex;align-items:center;gap:10px}
+.range-wrap input[type=range]{flex:1;accent-color:var(--gm);height:6px}
+.range-val{font-size:14px;font-weight:700;color:var(--gd);min-width:40px;text-align:right}
+
+/* METRICS (synthese) */
+.met-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.met{background:var(--bg);border-radius:9px;padding:11px 10px;text-align:center}
+.met-l{font-size:10px;color:var(--mut);margin-bottom:4px}
+.met-v{font-size:20px;font-weight:700;color:var(--gd)}
+.met-u{font-size:10px;color:var(--hint);margin-top:1px}
+
+/* SYNTH ROWS */
+.sr{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--bg);font-size:13px;gap:12px}
+.sr:last-child{border-bottom:none}
+.sr-l{color:var(--mut);flex-shrink:0;max-width:55%}
+.sr-v{font-weight:600;text-align:right}
+
+/* NAV BAR */
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--bdr);padding:10px 14px;display:flex;gap:9px;z-index:100;box-shadow:0 -2px 8px rgba(0,0,0,.06)}
+.nav-inner{max-width:560px;margin:0 auto;display:flex;gap:9px;width:100%}
+.nbk{flex:0 0 auto;padding:12px 18px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;border:1.5px solid var(--bdr);background:#fafafa;color:var(--txt)}
+.nnx{flex:1;padding:12px;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;border:none;background:var(--gd);color:#fff}
+.nsv{flex:1;padding:12px;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;border:none;background:#4E342E;color:#fff}
+
+/* FICHES LIST */
+.fc{background:var(--card);border-radius:var(--r);padding:14px 16px;margin-bottom:9px;border:1px solid var(--bdr);cursor:pointer;transition:box-shadow .15s}
+.fc:active{box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.fi{font-weight:700;font-size:15px;color:var(--gd);margin-bottom:3px}
+.fe{font-size:12px;color:var(--mut);margin-bottom:8px}
+.ft{display:flex;gap:5px;flex-wrap:wrap}
+.badge{display:inline-block;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:600;background:var(--gp);color:var(--gd)}
+.badge-n{background:#f0f0f0;color:#555}
+.badge-a{background:var(--aml);color:var(--am)}
+.del-btn{background:transparent;border:none;color:#ccc;font-size:20px;cursor:pointer;padding:2px 6px;flex-shrink:0;line-height:1}
+.empty{text-align:center;padding:52px 24px}
+.empty-icon{font-size:56px;margin-bottom:16px}
+.empty-title{font-size:18px;font-weight:700;color:var(--gd);margin-bottom:8px}
+.empty-sub{font-size:13px;color:var(--hint);margin-bottom:30px;line-height:1.5}
+
+/* EXPORT BUTTON */
+.export-btn{width:100%;padding:13px;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;border:none;background:#4E342E;color:#fff;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px}
+.new-btn{width:100%;padding:13px;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;border:none;background:var(--gd);color:#fff;margin-bottom:12px}
+
+/* PAIN SECTION */
+.pain-blk{background:var(--aml);border-radius:9px;padding:12px 14px;margin-top:8px;border:1.5px solid #FFCC80}
+.pain-ttl{font-size:10px;font-weight:700;color:var(--am);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+</style>
+
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+// ── STORAGE (localStorage pour offline) ──────────────────────────────────────
+const STORAGE_KEY = 'tds2a_arbres_v1';
+function loadFiches(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}catch{return[];}}
+function saveFiches(f){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(f));return true;}catch{return false;}}
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let fiches=loadFiches();
+let view='list';
+let cur=null;
+let step=0;
+let done=new Set();
+let calOp='R';
+let saveMsg='';
+
+// ── DOM HELPERS ──────────────────────────────────────────────────────────────
+function h(tag,attrs={},...ch){
+  const el=document.createElement(tag);
+  for(const[k,v]of Object.entries(attrs)){
+    if(k==='class')el.className=v;
+    else if(k.startsWith('on'))el.addEventListener(k.slice(2),v);
+    else el.setAttribute(k,v);
+  }
+  for(const c of ch){
+    if(c==null||c===false)continue;
+    if(typeof c==='string')el.appendChild(document.createTextNode(c));
+    else el.appendChild(c);
+  }
+  return el;
+}
+
+function inp(val,key,attrs={}){
+  const e=h('input',{value:val||'',...attrs});
+  e.oninput=ev=>cur[key]=ev.target.value;
+  return e;
+}
+
+function selEl(val,key,opts,ph='— choisir —'){
+  const e=h('select');
+  e.appendChild(h('option',{value:''},ph));
+  opts.forEach(o=>{
+    const opt=h('option',{value:typeof o==='object'?o.v:o},typeof o==='object'?o.l:o);
+    e.appendChild(opt);
+  });
+  e.value=val||'';
+  e.onchange=ev=>{cur[key]=ev.target.value;render();};
+  return e;
+}
+
+function radio(val,key,opts,onchange){
+  const w=h('div',{class:'rg'});
+  opts.forEach(o=>{
+    const b=h('button',{class:'rb'+(val===o?' on':'')},o);
+    b.onclick=()=>{cur[key]=o;if(onchange)onchange(o);render();};
+    w.appendChild(b);
+  });
+  return w;
+}
+
+function multisel(vals,key,opts){
+  const w=h('div',{class:'cg'});
+  opts.forEach(o=>{
+    const on=(vals||[]).includes(o);
+    const b=h('button',{class:'cb-btn'+(on?' on':'')},on?'✓ ':' ',o);
+    b.onclick=()=>{
+      const arr=cur[key]||[];
+      cur[key]=arr.includes(o)?arr.filter(x=>x!==o):[...arr,o];
+      render();
+    };
+    w.appendChild(b);
+  });
+  return w;
+}
+
+function ta(val,key,ph=''){
+  const e=h('textarea',{placeholder:ph});
+  e.value=val||'';
+  e.oninput=ev=>cur[key]=ev.target.value;
+  return e;
+}
+
+function fld(lbl,req,child,note=''){
+  const lEl=h('label',{},lbl,req?h('span',{class:'req'},'★'):'');
+  if(note)lEl.appendChild(h('span',{class:'nsp-note'},note));
+  return h('div',{class:'f'},lEl,child);
+}
+
+function card(title,desc,...ch){
+  const parts=[h('div',{class:'ct'},title)];
+  if(desc)parts.push(h('div',{class:'ct-desc'},desc));
+  parts.push(...ch.filter(Boolean));
+  return h('div',{class:'card'},...parts);
+}
+
+function infobox(msg,type=''){
+  return h('div',{class:'info'+(type?' info-'+type:'')},h('span',{},'ℹ️'),h('span',{},msg));
+}
+
+function r2(...ch){const d=h('div',{class:'r2'});ch.filter(Boolean).forEach(c=>d.appendChild(c));return d;}
+function r3(...ch){const d=h('div',{class:'r3'});ch.filter(Boolean).forEach(c=>d.appendChild(c));return d;}
+function slbl(t){return h('div',{class:'slbl'},t);}
+
+function optSection(btnLabel,id,...ch){
+  const sec=h('div',{class:'opt-section',id:'opt-'+id},...ch.filter(Boolean));
+  const btn=h('div',{class:'opt-toggle',onclick:()=>{
+    const open=sec.classList.toggle('open');
+    btn.querySelector('.arrow').textContent=open?'▲':'▼';
+  }},h('span',{class:'arrow'},'▼'),' '+btnLabel);
+  return h('div',{},btn,sec);
+}
+
+function rng(lbl,key,val,req=false){
+  const sp=h('span',{class:'range-val'},val+'%');
+  const i=h('input',{type:'range',min:'0',max:'100',step:'5',value:String(val)});
+  i.oninput=e=>{cur[key]=parseInt(e.target.value);sp.textContent=e.target.value+'%';};
+  return fld(lbl,req,h('div',{class:'range-wrap'},i,sp));
+}
+
+function prodBlock(label,idx,fields){
+  return h('div',{class:'prod-block'},
+    h('div',{class:'prod-title'},label+' '+idx),
+    ...fields.filter(Boolean)
+  );
+}
+
+// AUTRE field: show text input when "Autre" selected
+function selWithAutre(val,autreVal,key,autreKey,opts){
+  const s=selEl(val,key,[...opts,'Autre']);
+  const inp_autre=h('input',{type:'text',value:autreVal||'',placeholder:'Préciser...',style:'margin-top:8px;display:'+(val==='Autre'?'block':'none')});
+  inp_autre.oninput=e=>cur[autreKey]=e.target.value;
+  const wrap=h('div',{},s,inp_autre);
+  s.addEventListener('change',()=>{inp_autre.style.display=s.value==='Autre'?'block':'none';});
+  return wrap;
+}
+
+function radioWithAutre(val,autreVal,key,autreKey,opts){
+  const w=h('div',{});
+  const rg=h('div',{class:'rg'});
+  [...opts,'Autre'].forEach(o=>{
+    const b=h('button',{class:'rb'+(val===o?' on':'')},o);
+    b.onclick=()=>{cur[key]=o;render();};
+    rg.appendChild(b);
+  });
+  const inp_autre=h('input',{type:'text',value:autreVal||'',placeholder:'Préciser...',style:'margin-top:8px;display:'+(val==='Autre'?'block':'none')});
+  inp_autre.oninput=e=>cur[autreKey]=e.target.value;
+  w.appendChild(rg);
+  w.appendChild(inp_autre);
+  rg.addEventListener('click',()=>{
+    setTimeout(()=>{inp_autre.style.display=cur[key]==='Autre'?'block':'none';},50);
+  });
+  return w;
+}
+
+// ── CALENDAR ────────────────────────────────────────────────────────────────
+const OPS=[
+  {k:'R',l:'Récolte',c:'#E65100',bg:'#FFF3E0'},
+  {k:'F',l:'Fertilisation',c:'#388E3C',bg:'#E8F5E9'},
+  {k:'T',l:'Taille',c:'#1565C0',bg:'#E3F2FD'},
+  {k:'D',l:'Désherbage',c:'#4E342E',bg:'#EFEBE9'},
+  {k:'Ph',l:'Traitement phyto',c:'#C62828',bg:'#FFEBEE'},
+  {k:'Fl',l:'Floraison',c:'#6A1B9A',bg:'#F3E5F5'},
+];
+const MOIS=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+
+function buildCal(f){
+  const opRow=h('div',{class:'cal-ops'});
+  OPS.forEach(op=>{
+    const sel=calOp===op.k;
+    const t=h('span',{class:'cal-op'+(sel?' sel':'')},op.l);
+    t.style.cssText='border-color:'+op.c+';background:'+(sel?op.bg:'#fafafa')+';color:'+(sel?op.c:'#999');
+    t.onclick=()=>{calOp=op.k;render();};
+    opRow.appendChild(t);
+  });
+  const grid=h('div',{class:'cal-grid'});
+  MOIS.forEach((m,i)=>{
+    const op=f.cal&&f.cal[i];
+    const od=OPS.find(o=>o.k===op);
+    const b=h('div',{class:'cal-m'},m,op?h('div',{style:'font-size:9px;margin-top:2px'},op):null);
+    if(od){b.style.background=od.bg;b.style.borderColor=od.c;b.style.color=od.c;}
+    b.onclick=()=>{
+      if(!f.cal)f.cal={};
+      if(f.cal[i]===calOp)delete f.cal[i];else f.cal[i]=calOp;
+      render();
+    };
+    grid.appendChild(b);
+  });
+  return h('div',{},opRow,grid);
+}
+
+// ── NAVIGATION ───────────────────────────────────────────────────────────────
+function today(){return new Date().toISOString().split('T')[0];}
+
+function nextStep(){done.add(step);step++;render();window.scrollTo(0,0);}
+function prevStep(){step--;render();window.scrollTo(0,0);}
+
+function saveCur(){
+  if(!cur)return;
+  const u={...cur,saved_at:new Date().toISOString()};
+  const i=fiches.findIndex(f=>f.id===u.id);
+  if(i>=0)fiches[i]=u;else fiches.push(u);
+  const ok=saveFiches(fiches);
+  saveMsg=ok?'✓ Sauvegardée':'⚠ Erreur';
+  cur=u;render();
+  setTimeout(()=>{saveMsg='';render();},2200);
+}
+
+function openFiche(id){
+  const f=fiches.find(x=>x.id===id);
+  if(!f)return;
+  cur={...f,cal:{...(f.cal||{})},circuits:[...(f.circuits||[])]};
+  step=0;done=new Set(STEPS.map((_,i)=>i));view='form';render();
+}
+
+function deleteFiche(id){
+  if(!confirm('Supprimer cette fiche ?'))return;
+  fiches=fiches.filter(f=>f.id!==id);
+  saveFiches(fiches);render();
+}
+
+function exportAll(){
+  const blob=new Blob([JSON.stringify(fiches,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='Arbres_Fruitiers_'+today()+'.json';
+  a.click();
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+function render(){
+  const app=document.getElementById('app');
+  app.innerHTML='';
+  if(view==='list'){renderList(app);}
+  else{renderForm(app);}
+}
+
+function renderList(app){
+  const top=h('div',{class:'top'},
+    h('div',{class:'top-info'},
+      h('h1',{},'🌳 Arbre Fruitier — TDS2A'),
+      h('p',{},'TDS2A Martinique · '+fiches.length+' fiche(s)')
+    )
+  );
+  app.appendChild(top);
+  const cnt=h('div',{class:'cnt'});
+  if(fiches.length===0){
+    cnt.appendChild(h('div',{class:'empty'},
+      h('div',{class:'empty-icon'},'🌳'),
+      h('div',{class:'empty-title'},'Aucune fiche encore'),
+      h('div',{class:'empty-sub'},'Appuyer sur le bouton pour commencer une nouvelle enquête'),
+      h('button',{class:'new-btn',onclick:newFiche},'+ Nouvelle fiche')
+    ));
+  } else {
+    cnt.appendChild(h('button',{class:'new-btn',onclick:newFiche},'+ Nouvelle fiche'));
+    if(fiches.length>0)cnt.appendChild(h('button',{class:'export-btn',onclick:exportAll},'⬇ Exporter toutes les fiches (JSON)'));
+    fiches.slice().reverse().forEach(f=>{
+      const fc=h('div',{class:'fc'},
+        h('div',{style:'display:flex;justify-content:space-between;align-items:flex-start'},
+          h('div',{style:'flex:1',onclick:()=>openFiche(f.id)},
+            h('div',{class:'fi'},f.id_enq||'Sans numéro'),
+            h('div',{class:'fe'},(f.espece||'Espèce non renseignée').split(' (')[0]),
+            h('div',{class:'ft'},
+              f.commune?h('span',{class:'badge'},f.commune):null,
+              f.stagiaire?h('span',{class:'badge badge-n'},f.stagiaire):null,
+              f.date?h('span',{class:'badge badge-n'},f.date):null,
+              f.nb_arbres?h('span',{class:'badge'},f.nb_arbres+' arbre(s)'):null,
+            )
+          ),
+          h('button',{class:'del-btn',onclick:e=>{e.stopPropagation();deleteFiche(f.id);}},'×')
+        )
+      );
+      cnt.appendChild(fc);
+    });
+  }
+  app.appendChild(cnt);
+}
+
+function renderForm(app){
+  const steps=STEPS;
+  const top=h('div',{class:'top'},
+    h('button',{class:'tbtn',onclick:()=>{view='list';render();}},'← Fiches'),
+    h('div',{class:'top-info'},
+      h('h1',{},steps[step].l),
+      h('p',{},'Étape '+(step+1)+' / '+steps.length+' — '+(cur.id_enq||'nouvelle fiche'))
+    ),
+    h('button',{class:'tbtn sv',onclick:saveCur},saveMsg||'💾 Sauv.')
+  );
+  app.appendChild(top);
+  app.appendChild(h('div',{class:'prog'},h('div',{class:'pf',style:'width:'+((step+1)/steps.length*100)+'%'})));
+  const tabs=h('div',{class:'tabs'});
+  steps.forEach((s,i)=>{
+    const t=h('div',{class:'tab'+(i===step?' active':done.has(i)?' done':'')},s.ic+' '+s.l);
+    t.onclick=()=>{step=i;render();};
+    tabs.appendChild(t);
+  });
+  app.appendChild(tabs);
+  const cnt=h('div',{class:'cnt'});
+  cnt.appendChild(renderStep());
+  // Inject send button on last step (synthese)
+  if(step===STEPS.length-1 && cur){setTimeout(()=>injectSendButton(cur),50);}
+  app.appendChild(cnt);
+  const nav=h('div',{class:'nav'});
+  const inner=h('div',{class:'nav-inner'});
+  if(step>0)inner.appendChild(h('button',{class:'nbk',onclick:prevStep},'← Retour'));
+  if(step<steps.length-1){
+    inner.appendChild(h('button',{class:'nnx',onclick:nextStep},'Suivant →'));
+  } else {
+    inner.appendChild(h('button',{class:'nsv',onclick:()=>{saveCur();view='list';render();}},'✓ Enregistrer la fiche'));
+  }
+  nav.appendChild(inner);
+  app.appendChild(nav);
+}
+
+// ── ENVOI GOOGLE SHEETS ──────────────────────────────────────────────────────
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmhGf3H-A4A9rPbbAbAK6hLAiVXfkf24hbZjZQeF2JKXc9-lmlHqRAUCZkzg58nClkYA/exec";
+
+async function sendToSheets(fiche) {
+  const btn = document.getElementById('send-btn');
+  const msg = document.getElementById('send-msg');
+  if (!btn || !msg) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ Envoi en cours…';
+  msg.textContent = '';
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(fiche)
+    });
+    btn.textContent = '✓ Envoyé à Google Sheets !';
+    btn.style.background = '#2E7D32';
+    msg.textContent = '✓ Fiche reçue — ID : ' + (fiche.id_enq || '?');
+    msg.style.color = '#2E7D32';
+    const idx = fiches.findIndex(f => f.id === fiche.id);
+    if (idx >= 0) { fiches[idx].sent_to_sheets = true; saveFiches(fiches); }
+  } catch(err) {
+    btn.textContent = '⚠ Erreur — réessayer';
+    btn.disabled = false;
+    btn.style.background = '#C62828';
+    msg.textContent = 'Vérifier la connexion internet.';
+    msg.style.color = '#C62828';
+  }
+}
+
+function injectSendButton(fiche) {
+  const existing = document.getElementById('send-zone');
+  if (existing) existing.remove();
+  const zone = document.createElement('div');
+  zone.id = 'send-zone';
+  zone.style.cssText = 'margin:12px 14px 4px;';
+  const btn = document.createElement('button');
+  btn.id = 'send-btn';
+  const alreadySent = fiche && fiche.sent_to_sheets;
+  btn.textContent = alreadySent ? '✓ Déjà envoyé — renvoyer ?' : '📤 Envoyer à Google Sheets';
+  btn.style.cssText = 'width:100%;padding:14px;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;border:none;background:' + (alreadySent ? '#2E7D32' : '#1B5E20') + ';color:#fff;font-family:inherit;margin-bottom:8px;display:block;';
+  btn.onclick = () => sendToSheets(fiche);
+  const msg = document.createElement('div');
+  msg.id = 'send-msg';
+  msg.style.cssText = 'font-size:12px;text-align:center;padding:4px;font-weight:500;min-height:18px;';
+  if (alreadySent) { msg.textContent = '✓ Cette fiche a déjà été envoyée au Google Sheet.'; msg.style.color = '#2E7D32'; }
+  zone.appendChild(btn);
+  zone.appendChild(msg);
+  const nav = document.querySelector('.nav');
+  if (nav) nav.parentNode.insertBefore(zone, nav);
+}
+
+</script>
+
+<script>
+
+const ESPECES_LIST=['Mangue (Mangifera indica)','Goyave (Psidium guajava)','Prune de Cythère (Spondias dulcis)','Abricot pays (Mammea americana)','Corossolier (Annona muricata)','Avocatier (Persea americana)','Carambolier (Averrhoa carambola)','Papayer (Carica papaya)','Agrumes — citron','Agrumes — orange','Agrumes — mandarine','Bananier à cuire (Musa spp.)','Cacao (Theobroma cacao)','Noix de coco (Cocos nucifera)','Tamarin (Tamarindus indica)','Autre'];
+const COMMUNES=['Le Vauclin','Rivière-Pilote','Morne-Vert','Saint-Esprit','Saint-Pierre','Morne-Rouge','Rivière-Salines','Le François','Le Robert','Sainte-Anne','Les Trois-Îlets','Le Lamentin','Fort-de-France','Le Marin','Sainte-Luce','Le Diamant','Rivière-Salée','Basse-Pointe','La Trinité','Sainte-Marie','Le Lorrain','Saint-Joseph','Gros-Morne','Macouba','Grand'Rivière','Le Prêcheur','Ajoupa-Bouillon','Fonds-Saint-Denis','Autre'];
+const STRATES=['Herbacée (0–0,5 m)','Arbustive (0,5–2 m)','Sous-arborée (2–5 m)','Arborée (5–10 m)','Canopée (> 10 m)','NSP'];
+const ARRANGEMENTS=['Isolé (arbre seul)','Alignement en bordure','Haie fruitière','Jardin multi-strates diffus','Association en lignes','Agroforêt dense','Plein champ arboricole','Autre'];
+const ORIGINES=['Rejet/drageons propres','Marcotte propre','Bouture propre','Pépiniériste local','Pépiniériste extérieur','Don/échange voisin','Cueillette/forêt','Semis propre','Autre','NSP'];
+const FERTIL_TYPES=['Fumier bovin','Fumier ovin/caprin','Lisier','Fiente de poule (granulés)','Compost maison','Compost acheté','Purin de plantes','Autre','NSP'];
+const FERTIL_MOMENTS=['Début de saison','Avant floraison','Après récolte','Continu','Autre','NSP'];
+const PHYTO_TYPES=['Fongicide','Insecticide','Acaricide','Herbicide','Biocontrôle','Préparation maison','Autre'];
+const EQUIPEMENTS=['Pulvérisateur à dos','Pulvérisateur électrique','Lance','Pompe à main','Autre'];
+const DESHERB=['Manuel uniquement','Débroussailleuse','Herbicide uniquement','Manuel + herbicide','Paillage végétal','Animaux sous l'arbre','Aucun','Autre','NSP'];
+const TAILLE_OUTILS=['Sécateur manuel','Sécateur sur perche','Ébrancheur','Scie égoïne','Scie sur perche','Tronçonneuse','Machette/coutelas','Perche élagueuse télescopique','Nacelle','Autre'];
+const ETAT_FRUIT=['Vert (immature)','Mi-mûr','Mûr','Très mûr','Variable selon débouché','Autre','NSP'];
+const REC_METHODES=['Cueillette manuelle à la main','Perche avec crochet','Couteau/machette','Ramassage au sol','Combiné','Autre'];
+const REC_EQUIPEMENTS=['Aucun','Échelle','Escabeau','Perche télescopique','Crochet','Machette','Autre'];
+const COND_REC=['Vrac au sol','Cagette','Sac','Panier','Autre'];
+const TRANSPORT_REC=['À pied','Brouette','Voiture personnelle','Pick-up','Camionnette','Autre'];
+const PREST_REMUN=['Au fruit (€/fruit)','À l'arbre (€/arbre)','Au kg (€/kg)','Au forfait (€/passage)','En nature (part de la récolte)','Autre','NSP'];
+const PREST_VEHICULE=['Voiture personnelle','Pick-up','Camionnette','Camion benne','Tracteur + remorque','Moto','À pied','Autre'];
+const PREP_FOYER=['Bouilli','Frit','Rôti','En soupe','Écrasé/pilé','Fermenté','Cru','Autre'];
+const DONS_QUI=['Famille proche','Famille éloignée','Voisins','Amis','Communauté/quartier','Église','École','Autre'];
+const DONS_FREQ=['Régulière (toute l'année)','Saisonnière','Occasionnelle','En surplus uniquement','Autre'];
+const CIRCUITS=['Marché local (forain)','Vente directe à la ferme','Bord de route','Restauration locale','Grossiste/bazardier','Circuits courts (AMAP…)','GMS (supermarché)','Export','Autre'];
+const QUI_PRIX=['Le producteur','L'acheteur','Négocié ensemble','Prix du marché','Autre','NSP'];
+const TRANSPORT_VENTE=['Voiture personnelle','Pick-up','Camionnette','Acheteur vient chercher','À pied','Autre','NSP'];
+const CONDITIONNEMENT_VENTE=['Vrac','Sac plastique','Cagette','Panier','Barquette','Autre'];
+const TRANSFO_TYPES=['Confiture','Jus','Chips/snacks','Séchage','Congélation','Farine','Plats cuisinés','Autre'];
+const AIDES=['DJA (Dotation Jeune Agriculteur)','FEADER','Aide CTM','Aide DAAF','Prêt bonifié','Aucune','Autre','NSP'];
+const PERSPECTIVES=['Agrandir','Maintenir tel quel','Réduire','Arrêter','Transformer davantage','Autre','NSP'];
+const MODES_PROD=['Conventionnel','Agriculture Biologique (AB)','En conversion AB','Agroécologique (non certifié)','Raisonné','Autre'];
+const CHLORDECONE=['Zone non contaminée','Zone à risque faible','Zone contaminée — restrictions en vigueur','Non précisé / NSP'];
+const ORIGINES_PRODUIT=['Acheté','Fait maison','Don','NSP'];
+const MOIS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+
+const STEPS=[
+  {l:'Identification',ic:'🪪'},
+  {l:'L\'arbre',ic:'🌳'},
+  {l:'Plantation',ic:'🌱'},
+  {l:'Pratiques',ic:'🌾'},
+  {l:'Récolte',ic:'🍎'},
+  {l:'Utilisation',ic:'🏡'},
+  {l:'Économie',ic:'💶'},
+  {l:'Synthèse',ic:'📊'},
+];
+
+function newFiche(){
+  cur={
+    id:Date.now().toString(),type:'gen',saved_at:null,
+    // Bloc 1
+    id_enq:'',date:today(),stagiaire:'',commune:'',
+    consent_enr:'',consent_photo:'',
+    surf_tot:'',mode_prod:'',elevage:'',type_elevage:'',chlordecone:'',
+    // Bloc 2
+    espece:'',espece_autre:'',
+    nb_arbres:'',age_moy:'',hauteur_moy:'',diam_tronc:'',
+    canopee_m2:'',etat_san:'',strate:'',arrangement:'',arrangement_autre:'',
+    cultures_assoc:'',
+    // Bloc 3
+    origine_plant:'',origine_plant_autre:'',
+    annee_plant:'',dist_arbres:'',prix_plant:'',temps_plant_h:'',
+    duree_non_prod:'',duree_prod:'',
+    // Bloc 4 - fertilisation (3 produits)
+    fertilise:'',
+    fert:[{type:'',nom:'',origine:'',origine_autre:'',compo:'',present:'',prix:'',dose:'',freq:'',moment:'',moment_autre:'',temps_h:''},
+          {type:'',nom:'',origine:'',origine_autre:'',compo:'',present:'',prix:'',dose:'',freq:'',moment:'',moment_autre:'',temps_h:''},
+          {type:'',nom:'',origine:'',origine_autre:'',compo:'',present:'',prix:'',dose:'',freq:'',moment:'',moment_autre:'',temps_h:''}],
+    N_total:'',
+    // phyto (3 produits)
+    phyto_oui:'',
+    phyto:[{nom:'',type:'',type_autre:'',origine:'',origine_autre:'',compo:'',present:'',prix:'',cible:'',dose:'',dose_ref:'',freq:'',mois_appli:'',equipt:'',equipt_autre:''},
+           {nom:'',type:'',type_autre:'',origine:'',origine_autre:'',compo:'',present:'',prix:'',cible:'',dose:'',dose_ref:'',freq:'',mois_appli:'',equipt:'',equipt_autre:''},
+           {nom:'',type:'',type_autre:'',origine:'',origine_autre:'',compo:'',present:'',prix:'',cible:'',dose:'',dose_ref:'',freq:'',mois_appli:'',equipt:'',equipt_autre:''}],
+    // désherbage
+    desherb:'',desherb_autre:'',herb_nom:'',herb_dose:'',desherb_freq:'',desherb_temps:'',
+    // taille entretien
+    taille_entr:'',taille_entr_freq:'',taille_entr_mois:'',taille_entr_outil:'',taille_entr_outil_autre:'',taille_entr_temps:'',taille_entr_cout:'',
+    // taille régénération
+    taille_regen:'',taille_regen_annee:'',taille_regen_freq:'',taille_regen_outil:'',taille_regen_outil_autre:'',taille_regen_temps:'',
+    // élagage
+    elagage:'',elagage_haut:'',elagage_freq:'',elagage_outil:'',elagage_outil_autre:'',elagage_temps:'',
+    // autres pratiques
+    irrigation:'',irrigation_detail:'',
+    paillage:'',paillage_detail:'',
+    greffe:'',greffe_detail:'',
+    autre_pratique:'',autre_pratique_detail:'',
+    // calendrier
+    cal:{},
+    // Bloc 5 récolte
+    nb_fruits_arbre:'',poids_fruit:'',
+    qte_bonne:'',qte_moy:'',qte_mauv:'',
+    etat_fruit:'',etat_fruit_autre:'',etat_fruit_comment:'',
+    mois_debut:'',mois_fin:'',nb_campagnes:'',
+    meth_rec:'',meth_rec_autre:'',
+    qui_recolte:'',
+    // prestataire
+    prest_profil:'',prest_freq:'',prest_remun:'',prest_remun_autre:'',prest_tarif:'',
+    prest_revend:'',prest_revend_qui:'',
+    prest_vehicule:'',prest_vehicule_autre:'',prest_capacite:'',prest_rayon:'',
+    // producteur
+    rec_equipt:'',rec_equipt_autre:'',rec_cond:'',rec_cond_autre:'',
+    rec_precautions:'',rec_precautions_detail:'',rec_transport:'',rec_transport_autre:'',
+    rec_temps_h:'',nb_pers_rec:'',mo_ext:'',cout_mo:'',
+    // Bloc 6 utilisation
+    pct_vendu:50,pct_auto:30,pct_donne:10,pct_transfo:10,pct_perdu:0,pct_transfo_ext:0,
+    // autoconso
+    autoconso:'',autoconso_qte:'',autoconso_unite:'',autoconso_freq:'',
+    autoconso_nb_pers:'',autoconso_modes:[],autoconso_remplace:'',autoconso_remplace_quoi:'',
+    autoconso_valeur:'',
+    // dons
+    dons:'',dons_qte:'',dons_unite:'',dons_qui:[],dons_qui_detail:'',
+    dons_freq:'',dons_freq_autre:'',dons_echange:'',dons_echange_quoi:'',dons_valeur:'',
+    // vente
+    circuits:[],
+    prix_moy:'',prix_bas:'',prix_haut:'',
+    qui_prix:'',qui_prix_autre:'',
+    prix_variab:'',mois_haut:'',mois_bas:'',
+    conditionnement:'',conditionnement_autre:'',
+    dist_km:'',transport_vente:'',transport_vente_autre:'',
+    // transformation
+    transfo:'',transfo_type:'',transfo_type_autre:'',
+    coeff_transfo:'',transfo_prix:'',transfo_present:'',transfo_present_autre:'',
+    transfo_debouche:'',transfo_raison:'',transfo_raison_autre:'',
+    // Bloc 7 économie
+    cout_mo_j:'',
+    EBE:'',cout_install:'',
+    aides:[],aides_montant:'',
+    perspectives:'',perspectives_autre:'',perspectives_pourquoi:'',
+    transmission:'',transmission_qui:'',
+    // notes
+    notes:'',gps:'',photos:'',
+  };
+  step=0;done=new Set();calOp='R';view='form';render();
+}
+
+
+// Helpers for product arrays
+function inpP(obj,key,attrs={},idx,arrKey){
+  const e=h('input',{value:obj[key]||'',...attrs});
+  e.oninput=ev=>{cur[arrKey][idx][key]=ev.target.value;};
+  return e;
+}
+function selElP(obj,key,opts,ph='— choisir —',idx,arrKey){
+  const e=h('select');
+  e.appendChild(h('option',{value:''},ph||'— choisir —'));
+  opts.forEach(o=>e.appendChild(h('option',{value:o},o)));
+  e.value=obj[key]||'';
+  e.onchange=ev=>{cur[arrKey][idx][key]=ev.target.value;render();};
+  return e;
+}
+function selWithAutreP(obj,key,autreKey,opts,idx,arrKey){
+  const s=selElP(obj,key,[...opts,'Autre'],'— choisir —',idx,arrKey);
+  const ia=h('input',{type:'text',value:obj[autreKey]||'',placeholder:'Préciser...',style:'margin-top:8px;display:'+(obj[key]==='Autre'?'block':'none')});
+  ia.oninput=e=>cur[arrKey][idx][autreKey]=e.target.value;
+  s.addEventListener('change',()=>{ia.style.display=s.value==='Autre'?'block':'none';});
+  return h('div',{},s,ia);
+}
+
+
+function renderStep(){
+  const f=cur;
+  switch(step){
+    case 0: return step0(f);
+    case 1: return step1(f);
+    case 2: return step2(f);
+    case 3: return step3(f);
+    case 4: return step4(f);
+    case 5: return step5(f);
+    case 6: return step6(f);
+    case 7: return step7(f);
+    default: return h('div',{},'—');
+  }
+}
+
+// ── BLOC 1 — IDENTIFICATION ──────────────────────────────────────────────────
+function step0(f){
+  return h('div',{},
+    infobox('Remplir au début de chaque entretien. Le numéro de fiche relie toutes les informations de cette enquête.'),
+    card('Enquête','',
+      r2(fld('Numéro de la fiche',true,inp(f.id_enq,'id_enq',{type:'text',placeholder:'ex: ENQ_001'})),
+         fld('Date',true,inp(f.date,'date',{type:'date'}))),
+      fld('Ton prénom',true,inp(f.stagiaire,'stagiaire',{type:'text',placeholder:'Prénom du stagiaire'})),
+      fld('Commune de l\'exploitation',true,selEl(f.commune,'commune',COMMUNES))
+    ),
+    card('Exploitation','',
+      r2(fld('Surface totale de l\'exploitation (ha)',true,inp(f.surf_tot,'surf_tot',{type:'number',placeholder:'ex: 1.5',step:'0.1'})),
+         fld('Comment est conduite l\'exploitation ?',true,selEl(f.mode_prod,'mode_prod',MODES_PROD))),
+      fld('Zone chlordécone ?',true,selEl(f.chlordecone,'chlordecone',CHLORDECONE),'Si NSP, cocher NSP'),
+      r2(fld('Il y a des animaux sur l\'exploitation ?',false,radio(f.elevage,'elevage',['Oui','Non','NSP'])),
+         f.elevage==='Oui'?fld('Quel type d\'élevage ?',false,inp(f.type_elevage,'type_elevage',{type:'text',placeholder:'ex: volailles, caprins…'})):null)
+    ),
+    card('Consentements','',
+      r2(fld('L\'agriculteur accepte d\'être enregistré ?',false,radio(f.consent_enr,'consent_enr',['Oui','Non'])),
+         fld('L\'agriculteur accepte les photos ?',false,radio(f.consent_photo,'consent_photo',['Oui','Non'])))
+    )
+  );
+}
+
+// ── BLOC 2 — L'ARBRE ─────────────────────────────────────────────────────────
+function step1(f){
+  return h('div',{},
+    infobox('Observer l\'arbre avant de poser des questions. Remplir ce qu\'on voit directement sur place.'),
+    card('Quelle espèce d\'arbre ?','',
+      fld('Espèce',true,selWithAutre(f.espece,f.espece_autre,'espece','espece_autre',ESPECES_LIST)),
+      r2(fld('Combien d\'arbres de cette espèce sur l\'exploitation ?',true,inp(f.nb_arbres,'nb_arbres',{type:'number',placeholder:'ex: 4',min:'1'})),
+         fld('Âge estimé de l\'arbre (ans)',false,inp(f.age_moy,'age_moy',{type:'number',placeholder:'ex: 12'})))
+    ),
+    card('Ce qu\'on observe sur l\'arbre','',
+      r2(fld('Hauteur moyenne des arbres (m)',false,inp(f.hauteur_moy,'hauteur_moy',{type:'number',placeholder:'ex: 8',step:'0.5'})),
+         fld('Diamètre du tronc à 1,30 m du sol (cm)',false,inp(f.diam_tronc,'diam_tronc',{type:'number',placeholder:'ex: 35'}))),
+      fld('Surface d\'ombre au sol sous l\'arbre (m²)',false,inp(f.canopee_m2,'canopee_m2',{type:'number',placeholder:'ex: 25',step:'1'})),
+      fld('État de santé de l\'arbre',false,selEl(f.etat_san,'etat_san',['1 — Très mauvais','2 — Mauvais','3 — Moyen','4 — Bon','5 — Excellent']))
+    ),
+    card('Où se trouve l\'arbre dans le système ?','',
+      fld('À quelle hauteur se trouve l\'arbre dans le système ?',false,selEl(f.strate,'strate',STRATES)),
+      fld('Comment les arbres sont-ils disposés ?',false,selWithAutre(f.arrangement,f.arrangement_autre,'arrangement','arrangement_autre',ARRANGEMENTS)),
+      fld('Quelles autres cultures poussent sous ou autour de l\'arbre ?',false,inp(f.cultures_assoc,'cultures_assoc',{type:'text',placeholder:'ex: igname, piment, herbes médicinales…'}))
+    )
+  );
+}
+
+// ── BLOC 3 — PLANTATION & CYCLE DE VIE ──────────────────────────────────────
+function step2(f){
+  return h('div',{},
+    card('D\'où vient l\'arbre ?','',
+      fld('D\'où vient le plant ou le rejet ?',false,selWithAutre(f.origine_plant,f.origine_plant_autre,'origine_plant','origine_plant_autre',ORIGINES)),
+      r2(fld('Année de plantation',false,inp(f.annee_plant,'annee_plant',{type:'number',placeholder:'ex: 2015',min:'1950',max:'2030'})),
+         fld('Distance entre les arbres (m)',false,inp(f.dist_arbres,'dist_arbres',{type:'number',placeholder:'ex: 6',step:'0.5'}))),
+      r2(fld('Prix du plant ou du rejet (€)',false,inp(f.prix_plant,'prix_plant',{type:'number',placeholder:'ex: 5',step:'0.5'})),
+         fld('Temps pour planter un arbre (h)',false,inp(f.temps_plant_h,'temps_plant_h',{type:'number',placeholder:'ex: 0.5',step:'0.25'})))
+    ),
+    card('Cycle de vie de l\'arbre','Ces données sont très importantes pour les arbres fruitiers. Estimer avec le producteur si nécessaire.',
+      infobox('La phase non productive = les années où l\'arbre ne donne pas encore de fruits.'),
+      r2(fld('Combien d\'années avant la première récolte ?',true,inp(f.duree_non_prod,'duree_non_prod',{type:'number',placeholder:'ex: 3',step:'0.5'})),
+         fld('Depuis combien d\'années l\'arbre produit-il ?',true,inp(f.duree_prod,'duree_prod',{type:'number',placeholder:'ex: 20'})))
+    )
+  );
+}
+
+// ── BLOC 4 — PRATIQUES CULTURALES ────────────────────────────────────────────
+function step3(f){
+  // Fertilisation products
+  const fertProds=[];
+  for(let i=0;i<3;i++){
+    const p=f.fert[i];
+    const block=h('div',{class:'prod-block'},
+      h('div',{class:'prod-title'},'Produit '+(i+1)),
+      fld('Nom du produit',i===0,inp(p,'nom',{type:'text',placeholder:'Nom commercial ou nom local'},i,'fert')),
+      r2(fld('Type de fertilisant',i===0,selEl(p,'type',FERTIL_TYPES,null,i,'fert')),
+         fld('D\'où vient le produit ?',i===0,selWithAutreP(p,'origine','origine_autre',ORIGINES_PRODUIT,i,'fert'))),
+      fld('Composition ou description',i===0,inpP(p,'compo',{type:'text',placeholder:'ex: fumier de mouton + bagasse, purin d\'ortie maison…'},i,'fert')),
+      fld('Présentation (ex: sac 25 kg, bidon 5 L)',i===0,inpP(p,'present',{type:'text',placeholder:'ex: sac 25 kg'},i,'fert')),
+      fld('Prix du produit (€ / unité)',i===0,inpP(p,'prix',{type:'number',placeholder:'ex: 15',step:'0.5'},i,'fert')),
+      r2(fld('Quantité par arbre et par passage',false,inpP(p,'dose',{type:'text',placeholder:'ex: 5 kg/arbre'},i,'fert')),
+         fld('Combien de fois par an ?',false,inpP(p,'freq',{type:'number',placeholder:'ex: 2'},i,'fert'))),
+      fld('À quel moment de l\'année ?',false,selWithAutreP(p,'moment','moment_autre',FERTIL_MOMENTS,i,'fert')),
+      fld('Temps passé à fertiliser (h/arbre/an)',false,inpP(p,'temps_h',{type:'number',placeholder:'ex: 0.5',step:'0.25'},i,'fert'))
+    );
+    if(i===0){fertProds.push(block);}
+    else{fertProds.push(block);}
+  }
+
+  // Phyto products
+  const phytoProds=[];
+  for(let i=0;i<3;i++){
+    const p=f.phyto[i];
+    phytoProds.push(h('div',{class:'prod-block'},
+      h('div',{class:'prod-title'},'Produit '+(i+1)),
+      fld('Nom du produit',i===0,inpP(p,'nom',{type:'text',placeholder:'Nom commercial ou nom local'},i,'phyto')),
+      r2(fld('Type de traitement',i===0,selWithAutreP(p,'type','type_autre',PHYTO_TYPES,i,'phyto')),
+         fld('D\'où vient le produit ?',i===0,selWithAutreP(p,'origine','origine_autre',ORIGINES_PRODUIT,i,'phyto'))),
+      fld('Composition ou ingrédients',i===0,inpP(p,'compo',{type:'text',placeholder:'ex: matière active, recette maison…'},i,'phyto')),
+      fld('Présentation (ex: bidon 1 L, poudre 500 g)',i===0,inpP(p,'present',{type:'text',placeholder:'ex: bidon 1 L'},i,'phyto')),
+      fld('Prix du produit (€ / unité)',i===0,inpP(p,'prix',{type:'number',placeholder:'ex: 8',step:'0.5'},i,'phyto')),
+      fld('Contre quoi est appliqué ce traitement ?',false,inpP(p,'cible',{type:'text',placeholder:'ex: cochenilles, anthracnose, mouche des fruits…'},i,'phyto')),
+      r2(fld('Dose utilisée (mL ou g par L d\'eau)',false,inpP(p,'dose',{type:'text',placeholder:'ex: 2 mL/L'},i,'phyto')),
+         fld('Dose recommandée sur l\'étiquette',false,inpP(p,'dose_ref',{type:'text',placeholder:'ex: 4 mL/L'},i,'phyto'))),
+      r2(fld('Combien de passages par an ?',false,inpP(p,'freq',{type:'number',placeholder:'ex: 3'},i,'phyto')),
+         fld('À quel(s) mois ?',false,inpP(p,'mois_appli',{type:'text',placeholder:'ex: Mars, Juillet'},i,'phyto'))),
+      fld('Quel équipement pour appliquer ?',false,selWithAutreP(p,'equipt','equipt_autre',EQUIPEMENTS,i,'phyto'))
+    ));
+  }
+
+  return h('div',{},
+    // Fertilisation
+    card('Est-ce que l\'arbre est fertilisé ?','',
+      fld('Fertilisation pratiquée ?',true,radio(f.fertilise,'fertilise',['Oui','Non','NSP'])),
+      f.fertilise==='Oui'?h('div',{style:'margin-top:10px'},
+        slbl('Fertilisation organique / minérale — jusqu\'à 3 produits'),
+        ...fertProds,
+        fld('Quantité d\'azote apportée au total (kg N/ha/an)',false,inp(f.N_total,'N_total',{type:'number',placeholder:'si calculé ou estimé',step:'1'}))
+      ):null
+    ),
+    // Phyto
+    card('Est-ce que l\'arbre est traité contre les maladies ou ravageurs ?','',
+      fld('Traitements pratiqués ?',true,radio(f.phyto_oui,'phyto_oui',['Oui','Non','NSP'])),
+      f.phyto_oui==='Oui'?h('div',{style:'margin-top:10px'},
+        slbl('Produits utilisés — jusqu\'à 3 produits'),
+        ...phytoProds
+      ):null
+    ),
+    // Désherbage
+    card('Comment est fait le désherbage ?','',
+      fld('Méthode de désherbage',true,selWithAutre(f.desherb,f.desherb_autre,'desherb','desherb_autre',DESHERB)),
+      (f.desherb&&f.desherb!=='Aucun'&&f.desherb!=='NSP')?h('div',{},
+        (f.desherb==='Herbicide uniquement'||f.desherb==='Manuel + herbicide')?h('div',{},
+          r2(fld('Nom du produit herbicide',false,inp(f.herb_nom,'herb_nom',{type:'text',placeholder:'Nom du produit'})),
+             fld('Dose utilisée',false,inp(f.herb_dose,'herb_dose',{type:'text',placeholder:'ex: 2 mL/L'})))
+        ):null,
+        r2(fld('Combien de fois par an ?',false,inp(f.desherb_freq,'desherb_freq',{type:'number',placeholder:'ex: 4'})),
+           fld('Temps passé au désherbage (h/ha/an)',false,inp(f.desherb_temps,'desherb_temps',{type:'number',placeholder:'ex: 6',step:'0.5'})))
+      ):null
+    ),
+    // Taille d'entretien
+    card('Taille d\'entretien','Taille annuelle sur arbre adulte : supprime les branches mortes, croisées ou mal orientées. Aère la frondaison pour favoriser la lumière et réduire les maladies.',
+      fld('Est-ce que l\'arbre est taillé régulièrement ?',true,radio(f.taille_entr,'taille_entr',['Oui','Non','NSP'])),
+      f.taille_entr==='Oui'?h('div',{},
+        r2(fld('Combien de fois par an ?',true,inp(f.taille_entr_freq,'taille_entr_freq',{type:'number',placeholder:'ex: 1',min:'1'})),
+           fld('À quel(s) mois ?',false,inp(f.taille_entr_mois,'taille_entr_mois',{type:'text',placeholder:'ex: Janvier, Juillet'}))),
+        r2(fld('Quel outil est utilisé ?',false,selWithAutre(f.taille_entr_outil,f.taille_entr_outil_autre,'taille_entr_outil','taille_entr_outil_autre',TAILLE_OUTILS)),
+           fld('Temps passé à tailler (h/arbre/an)',true,inp(f.taille_entr_temps,'taille_entr_temps',{type:'number',placeholder:'ex: 2',step:'0.5'}))),
+        fld('Coût si quelqu\'un d\'autre taille (€)',false,inp(f.taille_entr_cout,'taille_entr_cout',{type:'number',placeholder:'ex: 50',step:'5'}))
+      ):null
+    ),
+    // Sections optionnelles
+    optSection('Taille de régénération et élagage (optionnel)','tailles',
+      card('Taille de régénération','Taille sévère sur arbre vieillissant ou en perte de production : coupe des grosses branches pour relancer une nouvelle végétation productive. Réalisée tous les 10 à 20 ans selon l\'espèce.',
+        fld('Est-ce que l\'arbre a déjà été taillé sévèrement pour le relancer ?',false,radio(f.taille_regen,'taille_regen',['Oui','Non','NSP'])),
+        f.taille_regen==='Oui'?h('div',{},
+          r2(fld('Dernière fois que ça a été fait (année)',false,inp(f.taille_regen_annee,'taille_regen_annee',{type:'number',placeholder:'ex: 2018'})),
+             fld('Tous les combien d\'années environ ?',false,inp(f.taille_regen_freq,'taille_regen_freq',{type:'number',placeholder:'ex: 15'}))),
+          r2(fld('Quel outil ?',false,selWithAutre(f.taille_regen_outil,f.taille_regen_outil_autre,'taille_regen_outil','taille_regen_outil_autre',TAILLE_OUTILS)),
+             fld('Temps passé (h/arbre)',false,inp(f.taille_regen_temps,'taille_regen_temps',{type:'number',placeholder:'ex: 4',step:'0.5'})))
+        ):null
+      ),
+      card('Élagage / contrôle de hauteur','Réduction de la hauteur ou de l\'envergure pour faciliter la récolte et la circulation. Particulièrement important pour les espèces de grande taille : manguier, avocatier, cocotier.',
+        fld('Est-ce que la hauteur de l\'arbre est contrôlée ?',false,radio(f.elagage,'elagage',['Oui','Non','NSP'])),
+        f.elagage==='Oui'?h('div',{},
+          r2(fld('À quelle hauteur l\'arbre est-il maintenu (m) ?',false,inp(f.elagage_haut,'elagage_haut',{type:'number',placeholder:'ex: 6',step:'0.5'})),
+             fld('Combien de fois par an ?',false,inp(f.elagage_freq,'elagage_freq',{type:'number',placeholder:'ex: 1'}))),
+          r2(fld('Quel outil ?',false,selWithAutre(f.elagage_outil,f.elagage_outil_autre,'elagage_outil','elagage_outil_autre',TAILLE_OUTILS)),
+             fld('Temps passé (h/arbre/an)',false,inp(f.elagage_temps,'elagage_temps',{type:'number',placeholder:'ex: 2',step:'0.5'})))
+        ):null
+      )
+    ),
+    optSection('Autres pratiques (irrigation, paillage, greffe…)','autres',
+      card('Autres pratiques','',
+        fld('L\'arbre est-il irrigué ?',false,radio(f.irrigation,'irrigation',['Oui','Non','NSP'])),
+        f.irrigation==='Oui'?fld('Détail (source, méthode, fréquence)',false,inp(f.irrigation_detail,'irrigation_detail',{type:'text',placeholder:'ex: goutte à goutte, eau de pluie récupérée, 2x/semaine'})):null,
+        fld('Y a-t-il du paillage au pied de l\'arbre ?',false,radio(f.paillage,'paillage',['Oui','Non','NSP'])),
+        f.paillage==='Oui'?fld('Détail (matériau, épaisseur)',false,inp(f.paillage_detail,'paillage_detail',{type:'text',placeholder:'ex: feuilles mortes, 10 cm'})):null,
+        fld('Des arbres sont-ils greffés ?',false,radio(f.greffe,'greffe',['Oui','Non','NSP'])),
+        f.greffe==='Oui'?fld('Détail (type de greffe, porte-greffe)',false,inp(f.greffe_detail,'greffe_detail',{type:'text',placeholder:'ex: greffe en fente, porte-greffe local'})):null,
+        fld('Autre pratique non listée ?',false,radio(f.autre_pratique,'autre_pratique',['Oui','Non'])),
+        f.autre_pratique==='Oui'?fld('Décrire la pratique, la fréquence, le temps',false,inp(f.autre_pratique_detail,'autre_pratique_detail',{type:'text',placeholder:'description, fréquence, temps passé'})):null
+      )
+    ),
+    // Calendrier
+    card('Calendrier des opérations','Sélectionner une opération puis appuyer sur les mois actifs.',
+      infobox('R = Récolte · F = Fertilisation · T = Taille · D = Désherbage · Ph = Traitement phyto · Fl = Floraison'),
+      buildCal(f)
+    )
+  );
+}
+
+// ── BLOC 5 — RÉCOLTE & PRODUCTION ────────────────────────────────────────────
+function step4(f){
+  const pm=parseFloat(f.qte_moy)||(parseFloat(f.nb_fruits_arbre||0)*parseFloat(f.poids_fruit||0))||0;
+  return h('div',{},
+    card('Production','',
+      r2(fld('Combien de fruits par arbre et par an ?',true,inp(f.nb_fruits_arbre,'nb_fruits_arbre',{type:'number',placeholder:'ex: 80',min:'0'})),
+         fld('Poids moyen d\'un fruit (kg)',true,inp(f.poids_fruit,'poids_fruit',{type:'number',placeholder:'ex: 0.3',step:'0.05'}))),
+      pm>0?infobox('📊 Production estimée : '+pm.toFixed(0)+' kg/arbre/an'):null,
+      r3(fld('Quantité récoltée une bonne année (kg/arbre)',false,inp(f.qte_bonne,'qte_bonne',{type:'number',placeholder:'ex: 80'})),
+         fld('Quantité récoltée une année normale (kg/arbre)',true,inp(f.qte_moy,'qte_moy',{type:'number',placeholder:'ex: 50'})),
+         fld('Quantité récoltée une mauvaise année (kg/arbre)',false,inp(f.qte_mauv,'qte_mauv',{type:'number',placeholder:'ex: 20'}))),
+      fld('À quel stade le fruit est-il récolté ?',true,selWithAutre(f.etat_fruit,f.etat_fruit_autre,'etat_fruit','etat_fruit_autre',ETAT_FRUIT)),
+      fld('Commentaire sur l\'état du fruit',false,inp(f.etat_fruit_comment,'etat_fruit_comment',{type:'text',placeholder:'ex: vert pour export, mûr pour marché local'}))
+    ),
+    card('Calendrier de récolte','',
+      r2(fld('Mois de début de récolte',true,selEl(f.mois_debut,'mois_debut',MOIS)),
+         fld('Mois de fin de récolte',true,selEl(f.mois_fin,'mois_fin',MOIS))),
+      fld('Combien de saisons de récolte par an ?',true,inp(f.nb_campagnes,'nb_campagnes',{type:'number',placeholder:'ex: 2',min:'1'}))
+    ),
+    card('Comment est faite la récolte ?','',
+      fld('Comment est faite la récolte ?',true,selWithAutre(f.meth_rec,f.meth_rec_autre,'meth_rec','meth_rec_autre',REC_METHODES)),
+      fld('Quel équipement pour récolter ?',false,selWithAutre(f.rec_equipt,f.rec_equipt_autre,'rec_equipt','rec_equipt_autre',REC_EQUIPEMENTS)),
+      fld('Comment les fruits sont-ils mis en caisse / sac sur place ?',false,selWithAutre(f.rec_cond,f.rec_cond_autre,'rec_cond','rec_cond_autre',COND_REC)),
+      fld('Des précautions sont-elles prises pour ne pas abîmer les fruits ?',false,radio(f.rec_precautions,'rec_precautions',['Oui','Non'])),
+      f.rec_precautions==='Oui'?fld('Lesquelles ?',false,inp(f.rec_precautions_detail,'rec_precautions_detail',{type:'text',placeholder:'ex: cueillette douce, éviter la chute…'})):null,
+      fld('Comment les fruits sont-ils transportés jusqu\'au point de vente ou de stockage ?',false,selWithAutre(f.rec_transport,f.rec_transport_autre,'rec_transport','rec_transport_autre',TRANSPORT_REC))
+    ),
+    card('Qui récolte ?','',
+      fld('Qui récolte ?',true,radio(f.qui_recolte,'qui_recolte',['Le producteur lui-même','Un prestataire extérieur','Les deux'])),
+      (f.qui_recolte==='Un prestataire extérieur'||f.qui_recolte==='Les deux')?h('div',{},
+        slbl('Informations sur le prestataire'),
+        fld('Qui est le récolteur externe ?',false,inp(f.prest_profil,'prest_profil',{type:'text',placeholder:'ex: récolteur indépendant, acheteur-récolteur…'})),
+        fld('Combien de fois vient-il récolter ?',true,inp(f.prest_freq,'prest_freq',{type:'text',placeholder:'ex: 2 fois par saison, toutes les semaines en période…'})),
+        fld('Comment est-il payé ?',true,selWithAutre(f.prest_remun,f.prest_remun_autre,'prest_remun','prest_remun_autre',PREST_REMUN)),
+        fld('Combien est-il payé ?',true,inp(f.prest_tarif,'prest_tarif',{type:'text',placeholder:'ex: 0.50 €/fruit, 15 €/arbre, 0.30 €/kg…'})),
+        fld('Est-ce qu\'il revend les fruits lui-même ?',false,radio(f.prest_revend,'prest_revend',['Oui','Non','NSP'])),
+        f.prest_revend==='Oui'?fld('À qui revend-il ?',false,inp(f.prest_revend_qui,'prest_revend_qui',{type:'text',placeholder:'ex: marché local, bazardier, particuliers…'})):null,
+        slbl('Véhicule du prestataire'),
+        fld('Quel véhicule utilise-t-il ?',true,selWithAutre(f.prest_vehicule,f.prest_vehicule_autre,'prest_vehicule','prest_vehicule_autre',PREST_VEHICULE)),
+        r2(fld('Capacité de son véhicule (kg ou nb de caisses)',false,inp(f.prest_capacite,'prest_capacite',{type:'text',placeholder:'ex: 500 kg, 20 caisses'})),
+           fld('Dans quel rayon intervient-il (km) ?',false,inp(f.prest_rayon,'prest_rayon',{type:'number',placeholder:'ex: 10',step:'1'})))
+      ):null,
+      (f.qui_recolte==='Le producteur lui-même'||f.qui_recolte==='Les deux')?h('div',{},
+        slbl('Temps de travail — récolte par le producteur'),
+        r2(fld('Temps passé à récolter (h/arbre/an)',true,inp(f.rec_temps_h,'rec_temps_h',{type:'number',placeholder:'ex: 3',step:'0.5'})),
+           fld('Combien de personnes pour la récolte ?',true,inp(f.nb_pers_rec,'nb_pers_rec',{type:'number',placeholder:'ex: 2',min:'1'}))),
+        r2(fld('Des personnes extérieures sont-elles payées pour récolter ?',false,radio(f.mo_ext,'mo_ext',['Oui','Non'])),
+           f.mo_ext==='Oui'?fld('Combien sont-elles payées (€/jour) ?',false,inp(f.cout_mo,'cout_mo',{type:'number',placeholder:'ex: 80',step:'5'})):null)
+      ):null
+    )
+  );
+}
+
+// ── BLOC 6 — UTILISATION DE LA PRODUCTION ────────────────────────────────────
+function step5(f){
+  const total=(parseInt(f.pct_vendu)||0)+(parseInt(f.pct_auto)||0)+(parseInt(f.pct_donne)||0)+(parseInt(f.pct_transfo)||0)+(parseInt(f.pct_perdu)||0)+(parseInt(f.pct_transfo_ext)||0);
+  return h('div',{},
+    card('Répartition de la production','Pour 100 kg de fruits récoltés, quelle part va vers chaque usage ?',
+      infobox(total>100?'⚠ Le total dépasse 100% — vérifier les valeurs':'Total : '+total+'% '+(total===100?'✓':'(doit faire 100%)')),
+      rng('% vendu en frais','pct_vendu',f.pct_vendu,true),
+      rng('% consommé à la maison (frais)','pct_auto',f.pct_auto,true),
+      rng('% donné','pct_donne',f.pct_donne,true),
+      rng('% transformé par le producteur','pct_transfo',f.pct_transfo,false),
+      rng('% vendu à un transformateur externe','pct_transfo_ext',f.pct_transfo_ext,false),
+      rng('% perdu / non récolté','pct_perdu',f.pct_perdu,false)
+    ),
+    card('Consommation à la maison','',
+      fld('Des fruits sont-ils consommés à la maison ?',true,radio(f.autoconso,'autoconso',['Oui','Non'])),
+      f.autoconso==='Oui'?h('div',{},
+        slbl('Quantité consommée à la maison'),
+        r2(fld('Quantité (choisir l\'unité)',true,inp(f.autoconso_qte,'autoconso_qte',{type:'number',placeholder:'ex: 30'})),
+           fld('Unité',true,selEl(f.autoconso_unite,'autoconso_unite',['kg/an','% de la récolte','Nb de fruits/an','NSP']))),
+        r2(fld('À quelle fréquence mange-t-on ce fruit à la maison ?',true,selEl(f.autoconso_freq,'autoconso_freq',['Quotidienne','Plusieurs fois par semaine','Hebdomadaire','Occasionnelle','Saisonnière','Autre','NSP'])),
+           fld('Combien de personnes dans le foyer ?',true,inp(f.autoconso_nb_pers,'autoconso_nb_pers',{type:'number',placeholder:'ex: 4',min:'1'}))),
+        fld('Comment est préparé le fruit à la maison ?',false,multisel(f.autoconso_modes,'autoconso_modes',PREP_FOYER)),
+        fld('Ce fruit remplace-t-il des aliments achetés ?',false,radio(f.autoconso_remplace,'autoconso_remplace',['Oui','Non','NSP'])),
+        f.autoconso_remplace==='Oui'?fld('Lesquels ?',false,inp(f.autoconso_remplace_quoi,'autoconso_remplace_quoi',{type:'text',placeholder:'ex: pain, riz, farine importée…'})):null,
+        fld('Valeur estimée de ce qui est consommé à la maison (€/an)',false,inp(f.autoconso_valeur,'autoconso_valeur',{type:'number',placeholder:'si estimé',step:'10'}))
+      ):null
+    ),
+    card('Dons et échanges','',
+      fld('Est-ce que des fruits sont donnés ?',true,radio(f.dons,'dons',['Oui','Non'])),
+      f.dons==='Oui'?h('div',{},
+        slbl('Quantité donnée'),
+        r2(fld('Quantité (choisir l\'unité)',true,inp(f.dons_qte,'dons_qte',{type:'number',placeholder:'ex: 20'})),
+           fld('Unité',true,selEl(f.dons_unite,'dons_unite',['kg/an','% de la récolte','Nb de fruits/an','NSP']))),
+        fld('À qui sont donnés les fruits ?',true,multisel(f.dons_qui,'dons_qui',DONS_QUI)),
+        fld('Préciser si besoin',false,inp(f.dons_qui_detail,'dons_qui_detail',{type:'text',placeholder:'ex: famille à Fort-de-France, voisins de quartier…'})),
+        fld('À quelle fréquence ?',true,selWithAutre(f.dons_freq,f.dons_freq_autre,'dons_freq','dons_freq_autre',DONS_FREQ)),
+        fld('Des fruits sont-ils échangés contre autre chose ?',false,radio(f.dons_echange,'dons_echange',['Oui','Non','NSP'])),
+        f.dons_echange==='Oui'?fld('Contre quoi ?',false,inp(f.dons_echange_quoi,'dons_echange_quoi',{type:'text',placeholder:'ex: légumes, services, autre fruit…'})):null,
+        fld('Valeur estimée des fruits donnés (€/an)',false,inp(f.dons_valeur,'dons_valeur',{type:'number',placeholder:'si estimé',step:'10'}))
+      ):null
+    ),
+    card('Vente','',
+      fld('Où sont vendus les fruits ?',true,multisel(f.circuits,'circuits',CIRCUITS)),
+      r3(fld('Prix de vente moyen (€/kg)',true,inp(f.prix_moy,'prix_moy',{type:'number',placeholder:'ex: 1.5',step:'0.1'})),
+         fld('Prix le plus bas (€/kg)',false,inp(f.prix_bas,'prix_bas',{type:'number',placeholder:'ex: 0.8',step:'0.1'})),
+         fld('Prix le plus haut (€/kg)',false,inp(f.prix_haut,'prix_haut',{type:'number',placeholder:'ex: 2.5',step:'0.1'}))),
+      fld('Qui décide du prix de vente ?',true,selWithAutre(f.qui_prix,f.qui_prix_autre,'qui_prix','qui_prix_autre',QUI_PRIX)),
+      fld('Le prix change-t-il selon la saison ?',true,radio(f.prix_variab,'prix_variab',['Oui','Non','NSP'])),
+      f.prix_variab==='Oui'?r2(fld('Mois de prix les plus hauts',false,inp(f.mois_haut,'mois_haut',{type:'text',placeholder:'ex: Décembre, Janvier'})),
+                               fld('Mois de prix les plus bas',false,inp(f.mois_bas,'mois_bas',{type:'text'  ,placeholder:'ex: Juillet, Août'}))):null,
+      fld('Comment les fruits sont-ils présentés à la vente ?',false,selWithAutre(f.conditionnement,f.conditionnement_autre,'conditionnement','conditionnement_autre',CONDITIONNEMENT_VENTE)),
+      r2(fld('À quelle distance sont vendus les fruits (km) ?',true,inp(f.dist_km,'dist_km',{type:'number',placeholder:'ex: 5',min:'0'})),
+         fld('Comment les fruits sont-ils transportés pour la vente ?',true,selWithAutre(f.transport_vente,f.transport_vente_autre,'transport_vente','transport_vente_autre',TRANSPORT_VENTE)))
+    ),
+    card('Transformation','',
+      fld('Des fruits sont-ils transformés ?',true,radio(f.transfo,'transfo',['Oui','Non','NSP'])),
+      f.transfo==='Oui'?h('div',{},
+        fld('Que fait-on avec les fruits transformés ?',false,selWithAutre(f.transfo_type,f.transfo_type_autre,'transfo_type','transfo_type_autre',TRANSFO_TYPES)),
+        fld('Combien de kg de fruits pour faire 1 kg de produit fini ?',false,inp(f.coeff_transfo,'coeff_transfo',{type:'number',placeholder:'ex: 5',step:'0.5'})),
+        r2(fld('Prix de vente du produit transformé (€/kg ou €/unité)',false,inp(f.transfo_prix,'transfo_prix',{type:'number',placeholder:'ex: 4',step:'0.5'})),
+           fld('Comment est présenté le produit ?',false,selWithAutre(f.transfo_present,f.transfo_present_autre,'transfo_present','transfo_present_autre',['Vrac','Sachet','Bocal','Boîte','Autre'])))
+      ):null,
+      f.transfo==='Non'?fld('Pourquoi la transformation n\'est-elle pas pratiquée ?',false,selWithAutre(f.transfo_raison,f.transfo_raison_autre,'transfo_raison','transfo_raison_autre',['Pas d\'équipement','Pas de débouché','Pas de temps','Pas intéressé','Autre'])):null
+    )
+  );
+}
+
+// ── BLOC 7 — ÉCONOMIE ─────────────────────────────────────────────────────────
+function step6(f){
+  const nb=parseFloat(f.nb_arbres)||0;
+  const qm=parseFloat(f.qte_moy)||(parseFloat(f.nb_fruits_arbre||0)*parseFloat(f.poids_fruit||0))||0;
+  const px=parseFloat(f.prix_moy)||0;
+  const pv=(parseInt(f.pct_vendu)||0)/100;
+  const ca=Math.round(nb*qm*px*pv);
+  return h('div',{},
+    h('div',{class:'met-row'},
+      h('div',{class:'met'},h('div',{class:'met-l'},'Production moy.'),h('div',{class:'met-v'},qm>0?qm.toFixed(0):'—'),h('div',{class:'met-u'},'kg/arbre/an')),
+      h('div',{class:'met'},h('div',{class:'met-l'},'CA estimé'),h('div',{class:'met-v',style:'font-size:16px'},ca>0?ca.toLocaleString('fr-FR'):'—'),h('div',{class:'met-u'},'€/an')),
+      h('div',{class:'met'},h('div',{class:'met-l'},'Nb arbres'),h('div',{class:'met-v'},nb||'—'),h('div',{class:'met-u'},'arbres'))
+    ),
+    infobox('Le CA est calculé automatiquement. Les charges seront calculées après l\'enquête à partir des données des blocs précédents.'),
+    card('Main-d\'œuvre','',
+      fld('Combien est payée une personne extérieure par jour (€/jour) ?',true,inp(f.cout_mo_j,'cout_mo_j',{type:'number',placeholder:'ex: 80',step:'5'},'Si NSP, laisser vide'))
+    ),
+    card('Résultats économiques','',
+      fld('Ce que rapporte cette production après les dépenses (€/an)',false,inp(f.EBE,'EBE',{type:'number',placeholder:'si le producteur peut estimer',step:'50'})),
+      fld('Combien a coûté la mise en place de ces arbres (€) ?',false,inp(f.cout_install,'cout_install',{type:'number',placeholder:'ex: 500',step:'50'}))
+    ),
+    card('Aides et perspectives','',
+      fld('Est-ce que des aides ont été reçues pour cette production ?',false,multisel(f.aides,'aides',AIDES)),
+      fld('Montant total des aides (€/an)',false,inp(f.aides_montant,'aides_montant',{type:'number',placeholder:'si connu',step:'50'})),
+      fld('Qu\'est-ce que le producteur prévoit de faire ?',true,selWithAutre(f.perspectives,f.perspectives_autre,'perspectives','perspectives_autre',PERSPECTIVES)),
+      fld('Pourquoi ?',false,inp(f.perspectives_pourquoi,'perspectives_pourquoi',{type:'text',placeholder:'Raisons de ce choix…'})),
+      fld('Est-ce que la production sera transmise à quelqu\'un ?',false,radio(f.transmission,'transmission',['Oui','Non','NSP'])),
+      f.transmission==='Oui'?fld('À qui ?',false,inp(f.transmission_qui,'transmission_qui',{type:'text',placeholder:'ex: fils, neveu, jeune installé…'})):null
+    )
+  );
+}
+
+// ── BLOC 8 — SYNTHÈSE ─────────────────────────────────────────────────────────
+function step7(f){
+  const nb=parseFloat(f.nb_arbres)||0;
+  const qm=parseFloat(f.qte_moy)||(parseFloat(f.nb_fruits_arbre||0)*parseFloat(f.poids_fruit||0))||0;
+  const px=parseFloat(f.prix_moy)||0;
+  const pv=(parseInt(f.pct_vendu)||0)/100;
+  const ca=Math.round(nb*qm*px*pv);
+  const moisR=Object.entries(f.cal||{}).filter(([,v])=>v==='R').map(([i])=>MOIS[i]).join(', ');
+  const SR=(l,v)=>h('div',{class:'sr'},h('span',{class:'sr-l'},l),h('span',{class:'sr-v'},v||'—'));
+  return h('div',{},
+    h('div',{class:'met-row'},
+      h('div',{class:'met'},h('div',{class:'met-l'},'Production moy.'),h('div',{class:'met-v'},qm>0?qm.toFixed(0):'—'),h('div',{class:'met-u'},'kg/arbre/an')),
+      h('div',{class:'met'},h('div',{class:'met-l'},'CA estimé total'),h('div',{class:'met-v',style:'font-size:15px'},ca>0?ca.toLocaleString('fr-FR'):'—'),h('div',{class:'met-u'},'€/an')),
+      h('div',{class:'met'},h('div',{class:'met-l'},'Nb arbres'),h('div',{class:'met-v'},nb||'—'),h('div',{class:'met-u'},'arbres'))
+    ),
+    card('Récapitulatif','',
+      SR('Numéro de la fiche',f.id_enq),
+      SR('Stagiaire',f.stagiaire),
+      SR('Commune',f.commune),
+      SR('Espèce',(f.espece||'').split(' (')[0]||(f.espece_autre||'')),
+      SR('Nb arbres',f.nb_arbres&&f.nb_arbres+' arbre(s)'),
+      SR('Phase non productive',f.duree_non_prod&&f.duree_non_prod+' an(s)'),
+      SR('Phase productive',f.duree_prod&&f.duree_prod+' an(s)'),
+      SR('Fertilisation',f.fertilise),
+      SR('Taille d\'entretien',f.taille_entr),
+      SR('Traitements phyto',f.phyto_oui),
+      SR('Rendement moyen',qm>0&&qm.toFixed(0)+' kg/arbre/an'),
+      SR('Mois de récolte',moisR||(f.mois_debut&&f.mois_debut+' → '+f.mois_fin)),
+      SR('Campagnes/an',f.nb_campagnes),
+      SR('Qui récolte',f.qui_recolte),
+      SR('Prix vente moyen',f.prix_moy&&f.prix_moy+' €/kg'),
+      SR('% vendu',f.pct_vendu&&f.pct_vendu+'%'),
+      SR('% autoconsommé',f.pct_auto&&f.pct_auto+'%'),
+      SR('Circuits',f.circuits&&f.circuits.length>0?f.circuits.slice(0,3).join(', ')+(f.circuits.length>3?'…':''):'')
+    ),
+    card('Notes de l\'enquêteur','',
+      fld('Observations, points forts, contraintes, pratiques innovantes',false,ta(f.notes,'notes','Ce que le producteur a partagé en dehors des questions…')),
+      fld('Coordonnées GPS',false,inp(f.gps,'gps',{type:'text',placeholder:'14.652, -61.024'})),
+      fld('Références photos ou croquis',false,inp(f.photos,'photos',{type:'text',placeholder:'ex: ENQ_001_mangue_001.jpg'}))
+    ),
+    h('button',{class:'export-btn',style:'margin-top:4px',onclick:exportAll},'⬇ Exporter toutes les fiches (JSON)')
+  );
+}
+
+
+window.onload=()=>render();
+
+</script>
+</body>
+</html>
