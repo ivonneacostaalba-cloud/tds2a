@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1565C0">
+<title>TDS2A — Systèmes Diversifiés</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --gd:#1565C0;--gm:#1976D2;--gp:#E3F2FD;--gl:#BBDEFB;
+  --rd:#C62828;--bg:#EEF1EC;--card:#fff;--bdr:#DDE3DA;
+  --txt:#1C1F1A;--mut:#5A6358;--hint:#8A9488;
+  --r:12px;--ri:8px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding-bottom:92px}
+.app{max-width:560px;margin:0 auto}
+.top{background:var(--gd);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.top-info{flex:1}.top-info h1{font-size:13px;font-weight:600;line-height:1.3}.top-info p{font-size:10px;opacity:.7;margin-top:1px}
+.tbtn{background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:7px;padding:6px 11px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.prog{height:3px;background:rgba(255,255,255,.2)}.pf{height:100%;background:#fff;transition:width .3s}
+.tabs{display:flex;gap:3px;overflow-x:auto;padding:8px 12px 7px;background:var(--gd);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:5px 10px;border-radius:18px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:rgba(255,255,255,.14);color:rgba(255,255,255,.6);white-space:nowrap;transition:all .15s}
+.tab.active{background:#fff;color:var(--gd)}.tab.done{background:rgba(255,255,255,.28);color:#fff}
+.cnt{padding:12px 14px}
+.card{background:var(--card);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;border:1px solid var(--bdr);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.ct{font-size:10px;font-weight:700;color:var(--mut);margin-bottom:13px;text-transform:uppercase;letter-spacing:.06em}
+.f{margin-bottom:13px}.f:last-child{margin-bottom:0}
+.f label{display:block;font-size:12px;color:var(--mut);margin-bottom:5px;font-weight:500}
+.req{color:var(--rd);margin-left:2px}
+.desc{font-size:11px;color:var(--hint);font-style:italic;margin-bottom:6px;line-height:1.4}
+.inp,.sel,.ta{width:100%;font-size:15px;padding:10px 12px;border-radius:var(--ri);border:1.5px solid var(--bdr);background:#fff;color:var(--txt);-webkit-appearance:none;font-family:inherit;transition:border-color .15s}
+.inp:focus,.sel:focus,.ta:focus{outline:none;border-color:var(--gm)}
+.ta{min-height:76px;resize:vertical}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.rg{display:flex;gap:7px;flex-wrap:wrap}
+.rb{padding:8px 13px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--bdr);background:#fafafa;color:var(--txt);transition:all .15s}
+.rb.on{background:var(--gp);border-color:var(--gm);color:var(--gd)}
+.cbg{display:flex;flex-wrap:wrap;gap:7px}
+.cb-item{padding:7px 12px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--bdr);background:#fafafa;color:var(--txt);transition:all .15s}
+.cb-item.on{background:var(--gp);border-color:var(--gm);color:var(--gd)}
+.info{background:var(--gp);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--mut);margin-bottom:11px;display:flex;gap:7px;border-left:3px solid var(--gm);line-height:1.5}
+.expand-btn{width:100%;padding:9px 14px;border-radius:8px;border:1.5px dashed var(--bdr);background:transparent;color:var(--gm);font-size:13px;font-weight:600;cursor:pointer;text-align:left;margin-top:8px}
+.expand-content{display:none;margin-top:8px;padding:12px;background:#f5f8ff;border-radius:8px;border:1px solid var(--bdr)}
+.expand-content.open{display:block}
+.cult-hdr{background:var(--gd);color:#fff;border-radius:9px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.slbl{font-size:10px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.05em;margin:12px 0 8px;padding-top:4px;border-top:1px solid var(--bdr)}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:560px;background:#fff;border-top:1px solid var(--bdr);padding:10px 14px;display:flex;gap:9px;z-index:100;box-shadow:0 -2px 8px rgba(0,0,0,.06)}
+.nbk{flex:0 0 auto;padding:11px 16px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;border:1.5px solid var(--bdr);background:#fafafa;color:var(--txt)}
+.nnx{flex:1;padding:12px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;border:none;background:var(--gd);color:#fff}
+.nsv{flex:1;padding:12px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;border:none;background:#1B5E20;color:#fff}
+.fc{background:var(--card);border-radius:var(--r);padding:14px 16px;margin-bottom:9px;border:1px solid var(--bdr);cursor:pointer}
+.fi{font-weight:700;font-size:15px;color:var(--gd);margin-bottom:3px}
+.fe{font-size:12px;color:var(--mut);margin-bottom:8px}
+.ft{display:flex;gap:5px;flex-wrap:wrap}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:var(--gp);color:var(--gd)}
+.badge-n{background:#f0f0f0;color:#555}
+.db{background:transparent;border:none;color:#ccc;font-size:18px;cursor:pointer;padding:2px 6px;flex-shrink:0}
+.empty{text-align:center;padding:52px 24px}
+.empty-icon{font-size:54px;margin-bottom:16px}
+.empty-title{font-size:17px;font-weight:700;color:var(--gd);margin-bottom:8px}
+.empty-sub{font-size:13px;color:var(--hint);margin-bottom:28px}
+.new-btn{background:var(--gd);color:#fff;border:none;border-radius:9px;padding:13px 32px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-bottom:12px}
+.sr{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bg);font-size:13px}
+.sr:last-child{border-bottom:none}.sl{color:var(--mut)}.sv{font-weight:600}
+.parc-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.parc-table th{background:var(--gd);color:#fff;padding:6px 8px;text-align:left;font-size:11px}
+.parc-table td{padding:6px 4px;border-bottom:1px solid var(--bdr)}
+.parc-table input{width:100%;font-size:12px;padding:4px 6px;border:1px solid var(--bdr);border-radius:4px;background:#fff}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<script>
+const COMMUNES=["Le Vauclin","Rivière-Pilote","Morne-Vert","Saint-Esprit","Saint-Pierre","Morne-Rouge","Rivière-Salines","Le François","Le Robert","Sainte-Anne","Les Trois-Îlets","Le Lamentin","Fort-de-France","Le Marin","Sainte-Luce","Le Diamant","Rivière-Salée","Basse-Pointe","La Trinité","Sainte-Marie","Le Lorrain","Saint-Joseph","Gros-Morne","Macouba","Grand-Rivière","Le Prêcheur","Ajoupa-Bouillon","Fonds-Saint-Denis","Autre"];
+const OCC_AVANT=["Friche","Zone boisée","Maraîchage","Verger","Autre"];
+const OP_MO=["Préparation du sol","Labour","Sillonage","Désherbage","Plantation/semis","Fertilisation","Traitements phytosanitaires","Autres"];
+const EQUIP_SOL=["Tracteur","Herse","Gyrobroyeur","Herse rotative","Charrue","Autres"];
+const MOIS=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+const RESIDUS=["Laissés au champ","Enlevés et jetés","Enlevés et compostés","Enfouis"];
+const STEPS=[
+  {id:"s1",l:"Identification",ic:"🪪"},
+  {id:"s2",l:"Historique",ic:"📖"},
+  {id:"s3",l:"Parcelles",ic:"🗺️"},
+  {id:"s4",l:"Prépa sol",ic:"🚜"},
+  {id:"s5",l:"Description",ic:"🌿"},
+  {id:"s6",l:"Culture 1",ic:"🌱"},
+  {id:"s7",l:"Culture 2",ic:"🌱"},
+  {id:"s8",l:"Culture 3",ic:"🌱"},
+  {id:"s9",l:"Culture 4",ic:"🌱"},
+  {id:"s10",l:"Culture 5",ic:"🌱"},
+  {id:"s11",l:"Synthèse",ic:"✅"},
+];
+const SK="tds2a_sysdiv_v1";
+let fiches=[],view="list",cur=null,step=0,done=new Set();
+function today(){return new Date().toISOString().split("T")[0];}
+
+function blankCulture(){
+  return {
+    nom:"",
+    // Plantation
+    nb_plants:"",unite_plants:"",dist_plants:"",origine_plants:"",graines_pepinieriste:"",prix_plant:"",
+    mois_plantation:"",mois_debut_recolte:"",duree_cycle:"",duree_recolte:"",
+    outil_plant:"",temps_plant_ha:"",cout_plant_h:"",pers_plant:"",
+    // Fertilisation
+    fertilisee:"",moment_fertil:[],freq_fertil:"",nb_pass_fertil:"",
+    fumier:"",fumier_qte:"",fumier_origine:"",fumier_prix:"",
+    lisier:"",lisier_qte:"",lisier_origine:"",lisier_prix:"",
+    fiente:"",fiente_qte:"",fiente_origine:"",fiente_prix:"",
+    compost:"",compost_qte:"",compost_origine:"",compost_prix:"",
+    autre_org:"",autre_org_detail:"",
+    temps_fertil_org_ha:"",pers_fertil_org:"",
+    compost_propre:"",
+    engrais1_nom:"",engrais1_npk:"",engrais1_prix:"",engrais1_temps:"",engrais1_pers:"",
+    engrais2_nom:"",engrais2_npk:"",engrais2_prix:"",engrais2_temps:"",engrais2_pers:"",
+    engrais3_nom:"",engrais3_npk:"",engrais3_prix:"",engrais3_temps:"",engrais3_pers:"",
+    // Désherbage
+    desherb_mois:"",desherb_methode:"",
+    desherb_outil:"",desherb_temps_ha:"",desherb_cout_h:"",desherb_pers:"",
+    herb1_nom:"",herb1_dil:"",herb1_temps:"",herb1_cout:"",herb1_pers:"",herb1_cout_trav:"",
+    herb2_nom:"",herb2_dil:"",herb2_temps:"",herb2_cout:"",herb2_pers:"",herb2_cout_trav:"",
+    desherb_nb_pass:"",
+    // Phyto
+    maladies:"",
+    fongicides:"",insecticides:"",raticides:"",anti_limaces:"",autres_phyto:"",autres_phyto_detail:"",
+    phyto_methode:"",
+    phyto1_nom:"",phyto1_dil:"",phyto1_temps:"",phyto1_cout:"",phyto1_pers:"",phyto1_cout_trav:"",
+    phyto2_nom:"",phyto2_dil:"",phyto2_temps:"",phyto2_cout:"",phyto2_pers:"",phyto2_cout_trav:"",
+    phyto_nb_pass:"",phyto_propre:"",
+    // Entretien
+    entretien_ops:"",entretien_methode:"",entretien_outil:"",entretien_temps:"",entretien_cout:"",entretien_pers:"",entretien_mois:"",
+    // Récolte
+    duree_cycle_rec:"",surface_rec:"",
+    rdt_bonne:"",rdt_moy:"",rdt_mauv:"",
+    freq_rec_sem:"",qte_rec_sem:"",
+    ou_vendu:"",prix_moy:"",prix_bas:"",prix_haut:"",dist_livraison:"",
+    residus:"",
+  };
+}
+
+function blank(){
+  return {
+    id:Date.now().toString(),saved_at:null,type:"sysdiv",
+    // Bloc 1
+    id_enq:"",date:today(),stagiaire:"",nom_enquete:"",commune:"",telephone:"",
+    consent_enr:"",consent_photo:"",
+    // Bloc 2
+    annee_install:"",occupation_avant:[],occupation_avant_autre:"",
+    activite_avant:"",parents_agri:"",famille_agri:"",
+    emploi_ext:"",emploi_ext_secteur:"",
+    jours_sem:"",heures_jour:"",nb_plein_temps:"",
+    mo_externe:"",mo_operations:[],mo_cout_j:"",mo_horaires:"",mo_facilite:"",
+    productions_principales:"",changements:"",
+    elevage:"",elevage_detail:"",
+    aides_install:"",difficultes_demarrage:"",changements_importants:"",
+    // Bloc 3
+    surf_totale:"",surf_prod:"",morcelee:"",nb_parcelles:"",
+    location:"",propres:"",irriguees:"",acces_eau:"",
+    labour_meca:"",pente:"",pente_proportion:"",acces_difficile:"",
+    type_sol:"",logique_cultures:"",planification:"",
+    // Bloc 4
+    destruction_methode:"",
+    dest_manuel_temps:"",dest_manuel_pers:"",dest_manuel_cout:"",
+    debrouss:"",debrouss_temps:"",debrouss_cout_h:"",debrouss_pers:"",debrouss_fioul:"",debrouss_propre:"",debrouss_passages:"",
+    op1_nom:"",op1_temps:"",op1_cout_h:"",op1_pers:"",op1_equip:[],op1_propre:"",
+    op2_nom:"",op2_temps:"",op2_cout_h:"",op2_pers:"",op2_equip:[],op2_propre:"",
+    op3_nom:"",op3_temps:"",op3_cout_h:"",op3_pers:"",op3_equip:[],op3_propre:"",
+    tracteur_cv:"",total_passages:"",
+    herb_dest1_nom:"",herb_dest1_dil:"",herb_dest1_equip:"",herb_dest1_pass:"",herb_dest1_temps:"",herb_dest1_cout_h:"",herb_dest1_pers:"",
+    herb_dest2_nom:"",herb_dest2_dil:"",herb_dest2_equip:"",herb_dest2_pass:"",herb_dest2_temps:"",herb_dest2_cout_h:"",herb_dest2_pers:"",
+    // Bloc 5
+    croquis_ref:"",
+    list_vivriere:"",list_maraich:"",list_legumiere:"",list_fruitiere:"",
+    list_arbres:"",list_autres:"",
+    parcelles:[
+      {ilot:"",surface:"",cultures:"",duree:"",culture_prec:"",duree_prec:""},
+      {ilot:"",surface:"",cultures:"",duree:"",culture_prec:"",duree_prec:""},
+      {ilot:"",surface:"",cultures:"",duree:"",culture_prec:"",duree_prec:""},
+      {ilot:"",surface:"",cultures:"",duree:"",culture_prec:"",duree_prec:""},
+      {ilot:"",surface:"",cultures:"",duree:"",culture_prec:"",duree_prec:""},
+    ],
+    // 5 cultures
+    cultures:[blankCulture(),blankCulture(),blankCulture(),blankCulture(),blankCulture()],
+    // Notes
+    notes:"",gps:"",photos:"",
+  };
+}
+
+// STORAGE
+function load(){try{const d=localStorage.getItem(SK);if(d)fiches=JSON.parse(d);}catch{fiches=[];}}
+function saveFiches(f){try{localStorage.setItem(SK,JSON.stringify(f));return true;}catch{return false;}}
+
+// DOM HELPERS
+function h(tag,attrs,...ch){
+  const el=document.createElement(tag);
+  for(const[k,v]of Object.entries(attrs||{})){
+    if(k==="class")el.className=v;
+    else if(k.startsWith("on"))el.addEventListener(k.slice(2),v);
+    else el.setAttribute(k,v);
+  }
+  ch.forEach(c=>{if(c==null)return;el.appendChild(typeof c==="string"?document.createTextNode(c):c);});
+  return el;
+}
+function inp(val,key,attrs,obj){
+  const e=h("input",{class:"inp",value:val||"",...attrs});
+  e.addEventListener("input",ev=>{if(obj)obj[key]=ev.target.value;else cur[key]=ev.target.value;});
+  return e;
+}
+function sel(val,key,opts,ph,obj){
+  const e=h("select",{class:"sel"});
+  e.appendChild(h("option",{value:""},ph||"— choisir —"));
+  opts.forEach(o=>e.appendChild(h("option",{value:o},o)));
+  e.value=val||"";
+  e.addEventListener("change",ev=>{if(obj)obj[key]=ev.target.value;else cur[key]=ev.target.value;if(!obj)render();});
+  return e;
+}
+function ta(val,key,ph,obj){
+  const e=h("textarea",{class:"ta",placeholder:ph||""});
+  e.value=val||"";
+  e.addEventListener("input",ev=>{if(obj)obj[key]=ev.target.value;else cur[key]=ev.target.value;});
+  return e;
+}
+function fld(lbl,req,desc,child){
+  const parts=[h("label",{},lbl,req?h("span",{class:"req"}," ★"):"")];
+  if(desc)parts.push(h("div",{class:"desc"},desc));
+  parts.push(child);
+  return h("div",{class:"f"},...parts);
+}
+function crd(ttl,...ch){return h("div",{class:"card"},h("div",{class:"ct"},ttl),...ch.filter(Boolean));}
+function row2(...ch){const d=h("div",{class:"r2"});ch.forEach(c=>c&&d.appendChild(c));return d;}
+function row3(...ch){const d=h("div",{class:"r3"});ch.forEach(c=>c&&d.appendChild(c));return d;}
+function slbl(t){return h("div",{class:"slbl"},t);}
+function infobox(msg){return h("div",{class:"info"},h("span",{},"ℹ️ "),msg);}
+function radio(val,key,opts,obj,onChange){
+  const w=h("div",{class:"rg"});
+  opts.forEach(o=>{
+    const b=h("button",{class:"rb"+(val===o?" on":"")},o);
+    b.addEventListener("click",()=>{if(obj)obj[key]=o;else cur[key]=o;if(onChange)onChange(o);else render();});
+    w.appendChild(b);
+  });
+  return w;
+}
+function cbg(vals,key,opts,obj){
+  const w=h("div",{class:"cbg"});
+  opts.forEach(o=>{
+    const b=h("div",{class:"cb-item"+(vals.includes(o)?" on":"")},o);
+    b.addEventListener("click",()=>{
+      const arr=(obj?obj[key]:cur[key])||[];
+      if(arr.includes(o)){if(obj)obj[key]=arr.filter(x=>x!==o);else cur[key]=arr.filter(x=>x!==o);}
+      else{if(obj)obj[key]=[...arr,o];else cur[key]=[...arr,o];}
+      render();
+    });
+    w.appendChild(b);
+  });
+  return w;
+}
+function expand(label,...ch){
+  const btn=h("button",{class:"expand-btn"},label);
+  const content=h("div",{class:"expand-content"},...ch.filter(Boolean));
+  btn.addEventListener("click",()=>content.classList.toggle("open"));
+  return h("div",{},btn,content);
+}
+
+// ── STEP RENDERERS ────────────────────────────────────────────────────────────
+function s1(){
+  const f=cur;
+  return h("div",{},
+    crd("🪪 Identification et consentement",
+      row2(fld("Numéro de la fiche",true,null,inp(f.id_enq,"id_enq",{placeholder:"ex: ENQ_001"})),
+           fld("Date",true,null,inp(f.date,"date",{type:"date"}))),
+      fld("Nom du stagiaire",true,null,inp(f.stagiaire,"stagiaire",{placeholder:"Ton prénom"})),
+      fld("Nom de l'enquêté(e)",false,"Anonymisé si besoin",inp(f.nom_enquete,"nom_enquete",{placeholder:"Nom ou code"})),
+      fld("Commune",true,null,sel(f.commune,"commune",COMMUNES)),
+      fld("Téléphone",false,null,inp(f.telephone,"telephone",{type:"tel",placeholder:"ex: 0696 00 00 00"})),
+      row2(fld("Consentement enregistrement",false,null,radio(f.consent_enr,"consent_enr",["OUI","NON"])),
+           fld("Consentement photos des parcelles",false,null,radio(f.consent_photo,"consent_photo",["OUI","NON"])))
+    )
+  );
+}
+
+function s2(){
+  const f=cur;
+  return h("div",{},
+    crd("📖 Historique",
+      fld("Année d'installation",false,null,inp(f.annee_install,"annee_install",{type:"number",placeholder:"ex: 2010"})),
+      fld("Qu'est-ce qu'il y avait avant l'installation ?",false,null,cbg(f.occupation_avant||[],"occupation_avant",OCC_AVANT)),
+      (f.occupation_avant||[]).includes("Autre")?fld("Préciser",false,null,inp(f.occupation_avant_autre,"occupation_avant_autre",{placeholder:"Préciser…"})):null,
+      fld("Tu faisais quoi avant de t'installer ?",false,null,ta(f.activite_avant,"activite_avant","Activité avant l'installation…")),
+      row2(fld("Les parents étaient agriculteurs ?",false,null,radio(f.parents_agri,"parents_agri",["OUI","NON"])),
+           fld("La famille (les enfants) ?",false,null,radio(f.famille_agri,"famille_agri",["OUI","NON"])))
+    ),
+    crd("👷 Travail",
+      fld("Travailles-tu en dehors de l'exploitation ?",false,null,radio(f.emploi_ext,"emploi_ext",["OUI","NON"])),
+      f.emploi_ext==="OUI"?fld("Dans quel secteur ?",false,null,inp(f.emploi_ext_secteur,"emploi_ext_secteur",{placeholder:"ex: BTP, commerce, santé…"})):null,
+      row2(fld("Combien de jours travailles-tu par semaine à la ferme ?",false,null,inp(f.jours_sem,"jours_sem",{type:"number",placeholder:"ex: 5",min:"1",max:"7"})),
+           fld("Combien d'heures par jour ?",false,null,inp(f.heures_jour,"heures_jour",{type:"number",placeholder:"ex: 8",min:"1",max:"16"}))),
+      fld("Combien de personnes travaillent sur l'exploitation à plein temps ?",false,null,inp(f.nb_plein_temps,"nb_plein_temps",{type:"number",placeholder:"ex: 2",min:"1"})),
+      fld("Embauches-tu des personnes (jobs) ?",false,null,radio(f.mo_externe,"mo_externe",["OUI","NON"])),
+      f.mo_externe==="OUI"?h("div",{},
+        fld("Pour quelles opérations ?",false,null,cbg(f.mo_operations||[],"mo_operations",OP_MO)),
+        row2(fld("Combien ils sont payés la journée (€) ?",false,null,inp(f.mo_cout_j,"mo_cout_j",{type:"number",placeholder:"ex: 80",step:"5"})),
+             fld("Quels horaires ils font en général ?",false,null,inp(f.mo_horaires,"mo_horaires",{placeholder:"ex: 7h-13h"}))),
+        fld("C'est facile à embaucher ? Trouver de l'aide ?",false,null,ta(f.mo_facilite,"mo_facilite","Difficultés à trouver de la main-d'oeuvre…"))
+      ):null
+    ),
+    crd("🌾 Productions & élevage",
+      fld("Quelles sont tes productions principales ?",false,null,ta(f.productions_principales,"productions_principales","Lister les productions principales…")),
+      fld("Tu as changé depuis l'installation ? (arrêté / démarré / diversifié)",false,null,ta(f.changements,"changements","Évolutions depuis l'installation…")),
+      fld("As-tu de l'élevage ?",false,null,radio(f.elevage,"elevage",["OUI","NON"])),
+      f.elevage==="OUI"?fld("Type / nombre d'animaux",false,null,ta(f.elevage_detail,"elevage_detail","ex: 20 poulets, 5 cabris, 2 cochons…")):null
+    ),
+    crd("📋 Installation & bilan",
+      fld("As-tu bénéficié d'aides à l'installation ?",false,null,ta(f.aides_install,"aides_install","Type et montant des aides…")),
+      fld("Quelles ont été les principales difficultés pour réussir l'installation ?",false,null,ta(f.difficultes_demarrage,"difficultes_demarrage","")),
+      fld("Quels ont été les changements les plus importants depuis ton installation ?",false,null,ta(f.changements_importants,"changements_importants",""))
+    )
+  );
+}
+
+function s3(){
+  const f=cur;
+  return h("div",{},
+    crd("📐 Surfaces",
+      row2(fld("Superficie totale (ha)",true,null,inp(f.surf_totale,"surf_totale",{type:"number",placeholder:"ex: 1.5",step:"0.1"})),
+           fld("Superficie en production (ha)",true,null,inp(f.surf_prod,"surf_prod",{type:"number",placeholder:"ex: 1.2",step:"0.1"}))),
+      fld("L'exploitation est-elle morcelée ?",false,null,radio(f.morcelee,"morcelee",["OUI","NON"])),
+      f.morcelee==="OUI"?fld("Combien de parcelles ?",false,null,inp(f.nb_parcelles,"nb_parcelles",{type:"number",placeholder:"ex: 3",min:"1"})):null
+    ),
+    crd("🔑 Foncier & accès",
+      h("div",{class:"cbg",style:"margin-bottom:10px"},
+        ...[["location","Parcelles en location"],["propres","Parcelles propres"],["irriguees","Parcelles irriguées"]].map(([k,l])=>{
+          const b=h("div",{class:"cb-item"+(f[k]==="OUI"?" on":"")},l);
+          b.onclick=()=>{cur[k]=cur[k]==="OUI"?"NON":"OUI";render();};
+          return b;
+        })
+      ),
+      fld("Accès à l'eau",false,null,inp(f.acces_eau,"acces_eau",{placeholder:"ex: eau de pluie, SMEM, rivière…"})),
+      row2(fld("Les parcelles sont-elles accessibles pour un labour mécanisé ?",false,null,radio(f.labour_meca,"labour_meca",["OUI","NON"])),
+           fld("Les parcelles sont-elles en pente ?",false,null,radio(f.pente,"pente",["OUI","NON"]))),
+      f.pente==="OUI"?fld("Proportion de parcelles en pente",false,null,inp(f.pente_proportion,"pente_proportion",{placeholder:"ex: 50%"})):null,
+      fld("L'accès pour sortir la production après récolte est-il compliqué ?",false,null,radio(f.acces_difficile,"acces_difficile",["OUI","NON"]))
+    ),
+    crd("🪨 Sol & planification",
+      fld("Quel est le principal type de sol ?",false,null,ta(f.type_sol,"type_sol","ex: argileux, volcanique, sableux…")),
+      fld("Choisis-tu les cultures en fonction des parcelles ? Comment ?",false,null,ta(f.logique_cultures,"logique_cultures","")),
+      fld("Comment tu planifies tes cultures ? En fonction du marché ? des plants disponibles ?",false,null,ta(f.planification,"planification",""))
+    )
+  );
+}
+
+function s4(){
+  const f=cur;
+  return h("div",{},
+    crd("🚜 Destruction de la culture précédente",
+      fld("Comment a été détruite la culture précédente ?",false,null,cbg(f.destruction_methode||[],"destruction_methode",["Manuellement","Avec un engin","Avec un produit - Herbicide"])),
+      (f.destruction_methode||[]).includes("Manuellement")?h("div",{},
+        slbl("Si manuel"),
+        row3(fld("Temps par hectare",false,null,inp(f.dest_manuel_temps,"dest_manuel_temps",{placeholder:"ex: 8h/ha"})),
+             fld("Nb personnes",false,null,inp(f.dest_manuel_pers,"dest_manuel_pers",{type:"number",placeholder:"ex: 2"})),
+             fld("Coût (€)",false,null,inp(f.dest_manuel_cout,"dest_manuel_cout",{type:"number",placeholder:"ex: 200",step:"10"})))
+      ):null,
+      (f.destruction_methode||[]).includes("Avec un engin")?h("div",{},
+        slbl("Débroussailleuse"),
+        fld("Débroussailleuse utilisée ?",false,null,radio(f.debrouss,"debrouss",["OUI","NON"])),
+        f.debrouss==="OUI"?h("div",{},
+          row2(fld("Temps par hectare",false,null,inp(f.debrouss_temps,"debrouss_temps",{placeholder:"ex: 4h/ha"})),
+               fld("Coût/heure (€)",false,null,inp(f.debrouss_cout_h,"debrouss_cout_h",{type:"number",placeholder:"ex: 15",step:"0.5"}))),
+          row2(fld("Nb personnes",false,null,inp(f.debrouss_pers,"debrouss_pers",{type:"number",placeholder:"ex: 1"})),
+               fld("Fioul par heure (L)",false,null,inp(f.debrouss_fioul,"debrouss_fioul",{type:"number",placeholder:"ex: 0.5",step:"0.1"}))),
+          row2(fld("Équipement propre ?",false,null,radio(f.debrouss_propre,"debrouss_propre",["OUI","NON"])),
+               fld("Nb passages débroussailleuse",false,null,inp(f.debrouss_passages,"debrouss_passages",{type:"number",placeholder:"ex: 2"})))
+        ):null,
+        slbl("Autres opérations mécanisées"),
+        ...[["op1","Opération 1"],["op2","Opération 2"],["op3","Opération 3"]].map(([k,l])=>
+          expand("+ "+l,
+            fld("Nom de l'opération",false,null,inp(f[k+"_nom"],k+"_nom",{placeholder:"ex: Labour, Hersage…"})),
+            row2(fld("Temps/ha",false,null,inp(f[k+"_temps"],k+"_temps",{placeholder:"ex: 3h/ha"})),
+                 fld("Coût/heure (€)",false,null,inp(f[k+"_cout_h"],k+"_cout_h",{type:"number",placeholder:"ex: 20",step:"0.5"}))),
+            row2(fld("Nb personnes",false,null,inp(f[k+"_pers"],k+"_pers",{type:"number",placeholder:"ex: 1"})),
+                 fld("Équipement propre ?",false,null,radio(f[k+"_propre"],k+"_propre",["OUI","NON"]))),
+            fld("Type d'équipement",false,null,cbg(f[k+"_equip"]||[],k+"_equip",EQUIP_SOL))
+          )
+        ),
+        row2(fld("Puissance des tracteurs (CV)",false,null,inp(f.tracteur_cv,"tracteur_cv",{type:"number",placeholder:"ex: 60"})),
+             fld("Nb passages total",false,null,inp(f.total_passages,"total_passages",{type:"number",placeholder:"ex: 3"})))
+      ):null,
+      (f.destruction_methode||[]).includes("Avec un produit - Herbicide")?h("div",{},
+        slbl("Herbicides utilisés"),
+        ...[["herb_dest1","Produit 1"],["herb_dest2","Produit 2"]].map(([k,l])=>
+          h("div",{},
+            slbl(l),
+            row2(fld("Nom du produit",false,null,inp(f[k+"_nom"],k+"_nom",{placeholder:"Nom"})),
+                 fld("Dilution",false,null,inp(f[k+"_dil"],k+"_dil",{placeholder:"ex: 10 mL/L"}))),
+            row2(fld("Équipement",false,null,inp(f[k+"_equip"],k+"_equip",{placeholder:"ex: pulvérisateur"})),
+                 fld("Nb passages",false,null,inp(f[k+"_pass"],k+"_pass",{type:"number",placeholder:"ex: 2"}))),
+            row3(fld("Temps/ha",false,null,inp(f[k+"_temps"],k+"_temps",{placeholder:"ex: 2h/ha"})),
+                 fld("Coût/heure (€)",false,null,inp(f[k+"_cout_h"],k+"_cout_h",{type:"number",placeholder:"ex: 10"})),
+                 fld("Nb personnes",false,null,inp(f[k+"_pers"],k+"_pers",{type:"number",placeholder:"ex: 1"})))
+          )
+        )
+      ):null
+    )
+  );
+}
+
+function s5(){
+  const f=cur;
+  // Parcelles table
+  const tbl=h("table",{class:"parc-table"});
+  const thead=h("tr",{});
+  ["Îlot/Parcelle","Surface (ha)","Cultures en place","Durée (mois)","Culture précédente","Durée (mois)"].forEach(lbl=>thead.appendChild(h("th",{},lbl)));
+  tbl.appendChild(thead);
+  f.parcelles.forEach((p,i)=>{
+    const tr=h("tr",{});
+    ["ilot","surface","cultures","duree","culture_prec","duree_prec"].forEach(k=>{
+      const input=h("input",{class:"inp",value:p[k]||"",placeholder:"—",style:"font-size:12px;padding:4px 6px"});
+      input.addEventListener("input",ev=>f.parcelles[i][k]=ev.target.value);
+      tr.appendChild(h("td",{},input));
+    });
+    tbl.appendChild(tr);
+  });
+
+  return h("div",{},
+    crd("🗺️ Description de l'exploitation",
+      fld("Référence croquis / photos de parcelles",false,"Faire le croquis sur papier, numéroter les parcelles",inp(f.croquis_ref,"croquis_ref",{placeholder:"ex: ENQ_001_croquis.jpg"}))
+    ),
+    crd("🌿 Liste des cultures présentes",
+      fld("Cultures vivrières",false,null,ta(f.list_vivriere,"list_vivriere","ex: igname, madère, patate douce, manioc…")),
+      fld("Cultures maraîchères",false,null,ta(f.list_maraich,"list_maraich","ex: concombre, giraumon, piment, tomato…")),
+      fld("Cultures légumières",false,null,ta(f.list_legumiere,"list_legumiere","ex: haricot, pois, lentilles…")),
+      fld("Cultures fruitières",false,null,ta(f.list_fruitiere,"list_fruitiere","ex: ananas, banane, mangue, goyave…")),
+      fld("Arbres (nom + nombre)",false,null,ta(f.list_arbres,"list_arbres","ex: 3 manguiers, 5 arbres à pain, 2 avocatiers…")),
+      fld("Autres (plantes médicinales, fleurs, autres)",false,null,ta(f.list_autres,"list_autres","ex: citronnelle, hibiscus, persil…"))
+    ),
+    crd("📋 Tableau des parcelles",
+      infobox("Renseigner les 5 principales parcelles. Numéroter en cohérence avec le croquis."),
+      tbl
+    )
+  );
+}
+
+function sCulture(cultIdx){
+  const f=cur;
+  const c=f.cultures[cultIdx];
+  const num=cultIdx+1;
+
+  function ci(val,key,attrs){return inp(val,key,attrs,c);}
+  function cs(val,key,opts,ph){return sel(val,key,opts,ph,c);}
+  function ct(val,key,ph){return ta(val,key,ph,c);}
+  function cr(val,key,opts){return radio(val,key,opts,c);}
+  function cc(vals,key,opts){return cbg(vals||[],key,opts,c);}
+
+  return h("div",{},
+    h("div",{class:"cult-hdr"},"🌱 Culture "+num+" — "+(c.nom||"à renseigner")),
+    infobox("Frise annuelle construite avec le producteur. Focaliser sur les principales cultures."),
+    crd("🌱 Semis / Plantation",
+      fld("Nom de la culture",true,null,ci(c.nom,"nom",{placeholder:"ex: Igname, Concombre, Tomate…"})),
+      row2(fld("Nombre de plants par hectare ou m²",false,null,ci(c.nb_plants,"nb_plants",{type:"number",placeholder:"ex: 10000"})),
+           fld("Préciser l'unité (ha ou m²)",false,null,ci(c.unite_plants,"unite_plants",{placeholder:"ha / m²"}))),
+      fld("Distance entre les plants",false,null,ci(c.dist_plants,"dist_plants",{placeholder:"ex: 0.5 m × 0.8 m"})),
+      fld("Où achètes-tu les plants ?",false,null,ci(c.origine_plants,"origine_plants",{placeholder:"ex: pépiniériste, propre, marché…"})),
+      row2(fld("Donnes-tu les graines au pépiniériste ?",false,null,cr(c.graines_pepinieriste,"graines_pepinieriste",["OUI","NON"])),
+           fld("Prix par plant (€)",false,null,ci(c.prix_plant,"prix_plant",{type:"number",placeholder:"ex: 0.5",step:"0.1"}))),
+      row2(fld("Quel mois l'as-tu planté/semé ?",true,null,cs(c.mois_plantation,"mois_plantation",MOIS)),
+           fld("Quel mois as-tu démarré la récolte ?",true,null,cs(c.mois_debut_recolte,"mois_debut_recolte",MOIS))),
+      row2(fld("Durée du cycle (mois)",false,null,ci(c.duree_cycle,"duree_cycle",{type:"number",placeholder:"ex: 4",min:"1"})),
+           fld("Durée de récolte (mois)",false,null,ci(c.duree_recolte,"duree_recolte",{type:"number",placeholder:"ex: 2",min:"1"}))),
+      fld("Quel outil ?",false,null,ci(c.outil_plant,"outil_plant",{placeholder:"ex: bêche, charrue, semoir…"})),
+      row3(fld("Temps/ha",false,null,ci(c.temps_plant_ha,"temps_plant_ha",{placeholder:"ex: 40h/ha"})),
+           fld("Coût/heure (€)",false,null,ci(c.cout_plant_h,"cout_plant_h",{type:"number",placeholder:"ex: 12"})),
+           fld("Nb personnes",false,null,ci(c.pers_plant,"pers_plant",{type:"number",placeholder:"ex: 2"})))
+    ),
+    crd("🌾 Fertilisation",
+      fld("La culture est-elle fertilisée ?",true,null,cr(c.fertilisee,"fertilisee",["OUI","NON"])),
+      c.fertilisee==="OUI"?h("div",{},
+        fld("À quel moment tu fertilises ?",false,null,cc(c.moment_fertil||[],"moment_fertil",["Semis/plantation","À l'entretien","Avant la récolte","Autre"])),
+        row2(fld("Fréquence de fertilisation",false,null,ci(c.freq_fertil,"freq_fertil",{placeholder:"ex: 1 fois/mois"})),
+             fld("Combien de passages au total ?",false,null,ci(c.nb_pass_fertil,"nb_pass_fertil",{type:"number",placeholder:"ex: 3"}))),
+        slbl("Fertilisation organique"),
+        ...[
+          ["fumier","Fumier","fumier_qte","fumier_origine","fumier_prix"],
+          ["lisier","Lisier","lisier_qte","lisier_origine","lisier_prix"],
+          ["fiente","Caca poule en granulé","fiente_qte","fiente_origine","fiente_prix"],
+          ["compost","Compost","compost_qte","compost_origine","compost_prix"],
+        ].map(([k,l,kq,ko,kp])=>h("div",{style:"margin-bottom:10px"},
+          fld("Utilises-tu : "+l,false,null,cr(c[k],k,["OUI","NON"])),
+          c[k]==="OUI"?h("div",{},
+            row3(fld("Quantité/plant ou /ha",false,null,ci(c[kq],kq,{placeholder:"ex: 5 kg/m²"})),
+                 fld("Où l'achètes-tu ?",false,null,ci(c[ko],ko,{placeholder:"origine"})),
+                 fld("Prix",false,null,ci(c[kp],kp,{type:"number",placeholder:"€",step:"0.5"})))
+          ):null
+        )),
+        fld("Autres matières organiques",false,null,cr(c.autre_org,"autre_org",["OUI","NON"])),
+        c.autre_org==="OUI"?fld("Lesquelles ?",false,null,ci(c.autre_org_detail,"autre_org_detail",{placeholder:"Détailler…"})):null,
+        row2(fld("Temps pour fertiliser/ha",false,null,ci(c.temps_fertil_org_ha,"temps_fertil_org_ha",{placeholder:"ex: 8h/ha"})),
+             fld("Nb personnes/ha",false,null,ci(c.pers_fertil_org,"pers_fertil_org",{type:"number",placeholder:"ex: 2"}))),
+        fld("Production sur place de compost, fumier ou autre ?",false,null,ct(c.compost_propre,"compost_propre","Décrire la production sur place…")),
+        slbl("Fertilisation minérale"),
+        ...[1,2,3].map(n=>expand("+ Engrais chimique "+n,
+          row2(fld("Nom commercial",false,null,ci(c["engrais"+n+"_nom"],"engrais"+n+"_nom",{placeholder:"Nom de l'engrais"})),
+               fld("Composition NPK (ex: 12-12-24)",false,null,ci(c["engrais"+n+"_npk"],"engrais"+n+"_npk",{placeholder:"ex: 12-12-24"}))),
+          row3(fld("Prix au sac (€)",false,null,ci(c["engrais"+n+"_prix"],"engrais"+n+"_prix",{type:"number",placeholder:"€",step:"0.5"})),
+               fld("Temps/ha",false,null,ci(c["engrais"+n+"_temps"],"engrais"+n+"_temps",{placeholder:"ex: 4h/ha"})),
+               fld("Nb personnes/ha",false,null,ci(c["engrais"+n+"_pers"],"engrais"+n+"_pers",{type:"number",placeholder:"ex: 1"})))
+        ))
+      ):null
+    ),
+    crd("🪚 Désherbage",
+      fld("Quel mois se fait le désherbage ou temps après plantation ?",false,null,ci(c.desherb_mois,"desherb_mois",{placeholder:"ex: 1 mois après plantation"})),
+      fld("Méthode",false,null,cbg(c.desherb_methode||[],"desherb_methode",["Manuellement","Avec un engin","Avec un produit - Herbicide"])),
+      fld("Quel outil ?",false,null,ci(c.desherb_outil,"desherb_outil",{placeholder:"ex: machette, débroussailleuse…"})),
+      row3(fld("Temps/ha",false,null,ci(c.desherb_temps_ha,"desherb_temps_ha",{placeholder:"ex: 10h/ha"})),
+           fld("Coût/heure (€)",false,null,ci(c.desherb_cout_h,"desherb_cout_h",{type:"number",placeholder:"ex: 12"})),
+           fld("Nb personnes",false,null,ci(c.desherb_pers,"desherb_pers",{type:"number",placeholder:"ex: 2"}))),
+      ...[["herb1","Produit 1"],["herb2","Produit 2"]].map(([k,l])=>expand("+ Herbicide — "+l,
+        row2(fld("Nom du produit",false,null,ci(c[k+"_nom"],k+"_nom",{placeholder:"Nom"})),
+             fld("Quantité / dilution",false,null,ci(c[k+"_dil"],k+"_dil",{placeholder:"ex: 10 mL/L"}))),
+        row3(fld("Temps/ha",false,null,ci(c[k+"_temps"],k+"_temps",{placeholder:"ex: 4h/ha"})),
+             fld("Coût du produit (€)",false,null,ci(c[k+"_cout"],k+"_cout",{type:"number",placeholder:"€"})),
+             fld("Nb personnes",false,null,ci(c[k+"_pers"],k+"_pers",{type:"number",placeholder:"ex: 1"}))),
+        fld("Coût du travail (€)",false,null,ci(c[k+"_cout_trav"],k+"_cout_trav",{type:"number",placeholder:"€"}))
+      )),
+      fld("Combien de passages pour désherbage jusqu'à la récolte ?",false,null,ci(c.desherb_nb_pass,"desherb_nb_pass",{type:"number",placeholder:"ex: 3"}))
+    ),
+    crd("💊 Traitements phytosanitaires",
+      fld("Principales maladies ou problèmes de nuisibles",false,null,ct(c.maladies,"maladies","ex: anthracnose, mouche des fruits, pucerons…")),
+      slbl("Applications"),
+      h("div",{class:"cbg"},
+        ...[["fongicides","Fongicides"],["insecticides","Insecticides"],["raticides","Raticides"],["anti_limaces","Anti-limaces/escargots"]].map(([k,l])=>{
+          const b=h("div",{class:"cb-item"+(c[k]==="OUI"?" on":"")},l);
+          b.onclick=()=>{c[k]=c[k]==="OUI"?"NON":"OUI";render();};
+          return b;
+        })
+      ),
+      fld("Autres traitements",false,null,ct(c.autres_phyto_detail,"autres_phyto_detail","Préciser…")),
+      fld("Application",false,null,cbg(c.phyto_methode||[],"phyto_methode",["Manuellement","Avec un engin","Avec un produit","Autre"])),
+      ...[["phyto1","Produit 1"],["phyto2","Produit 2"]].map(([k,l])=>expand("+ Produit phyto — "+l,
+        row2(fld("Nom du produit",false,null,ci(c[k+"_nom"],k+"_nom",{placeholder:"Nom"})),
+             fld("Quantité / dilution",false,null,ci(c[k+"_dil"],k+"_dil",{placeholder:"ex: 5 mL/L"}))),
+        row3(fld("Temps/ha",false,null,ci(c[k+"_temps"],k+"_temps",{placeholder:"ex: 4h/ha"})),
+             fld("Coût du produit (€)",false,null,ci(c[k+"_cout"],k+"_cout",{type:"number",placeholder:"€"})),
+             fld("Nb personnes",false,null,ci(c[k+"_pers"],k+"_pers",{type:"number",placeholder:"ex: 1"}))),
+        fld("Coût du travail (€)",false,null,ci(c[k+"_cout_trav"],k+"_cout_trav",{type:"number",placeholder:"€"}))
+      )),
+      fld("Combien de passages pour la protection jusqu'à la récolte ?",false,null,ci(c.phyto_nb_pass,"phyto_nb_pass",{type:"number",placeholder:"ex: 4"})),
+      fld("Production propre de produits (purin, bouillie bordelaise, autre) ?",false,null,ct(c.phyto_propre,"phyto_propre","Décrire…"))
+    ),
+    crd("🔧 Entretien",
+      fld("Autres opérations d'entretien (buttage, tuteurage…)",false,null,ci(c.entretien_ops,"entretien_ops",{placeholder:"ex: buttage, tuteurage, écimage…"})),
+      fld("Méthode",false,null,cbg(c.entretien_methode||[],"entretien_methode",["Manuellement","Avec un engin","Avec un produit","Autre"])),
+      row2(fld("Quelle opération / outil",false,null,ci(c.entretien_outil,"entretien_outil",{placeholder:"ex: bêche, tuteur bambou…"})),
+           fld("Quand ? (mois)",false,null,ci(c.entretien_mois,"entretien_mois",{placeholder:"ex: mois 2"}))),
+      row3(fld("Temps/ha",false,null,ci(c.entretien_temps,"entretien_temps",{placeholder:"ex: 8h/ha"})),
+           fld("Coût/heure (€)",false,null,ci(c.entretien_cout,"entretien_cout",{type:"number",placeholder:"ex: 12"})),
+           fld("Nb personnes",false,null,ci(c.entretien_pers,"entretien_pers",{type:"number",placeholder:"ex: 2"})))
+    ),
+    crd("🧺 Récolte & vente",
+      row2(fld("Durée du cycle de récolte (mois/semaines)",false,null,ci(c.duree_cycle_rec,"duree_cycle_rec",{placeholder:"ex: 6 semaines"})),
+           fld("Surface concernée (préciser unité)",false,null,ci(c.surface_rec,"surface_rec",{placeholder:"ex: 0.5 ha"}))),
+      slbl("Rendements"),
+      row3(fld("Bonne année (kg)",false,null,ci(c.rdt_bonne,"rdt_bonne",{type:"number",placeholder:"ex: 5000"})),
+           fld("Année moyenne (kg)",true,null,ci(c.rdt_moy,"rdt_moy",{type:"number",placeholder:"ex: 3000"})),
+           fld("Mauvaise année (kg)",false,null,ci(c.rdt_mauv,"rdt_mauv",{type:"number",placeholder:"ex: 1000"}))),
+      row2(fld("Combien de fois tu récoltes par semaine ?",false,null,ci(c.freq_rec_sem,"freq_rec_sem",{type:"number",placeholder:"ex: 2",min:"1"})),
+           fld("Quelle quantité par semaine (kg) ?",false,null,ci(c.qte_rec_sem,"qte_rec_sem",{type:"number",placeholder:"ex: 200"}))),
+      fld("Où sont vendus les produits ?",false,null,ci(c.ou_vendu,"ou_vendu",{placeholder:"ex: marché du Vauclin, bazardier, restauration…"})),
+      row3(fld("Prix moyen de vente (€)",false,null,ci(c.prix_moy,"prix_moy",{type:"number",placeholder:"ex: 1.5",step:"0.1"})),
+           fld("Prix bas (€)",false,null,ci(c.prix_bas,"prix_bas",{type:"number",placeholder:"ex: 0.8",step:"0.1"})),
+           fld("Prix haut (€)",false,null,ci(c.prix_haut,"prix_haut",{type:"number",placeholder:"ex: 2.5",step:"0.1"}))),
+      fld("Distance de livraison ou de vente (km)",false,null,ci(c.dist_livraison,"dist_livraison",{type:"number",placeholder:"ex: 10",min:"0"})),
+      slbl("Après récolte"),
+      fld("Que deviennent les résidus de culture ?",false,null,cbg(c.residus||[],"residus",RESIDUS))
+    )
+  );
+}
+
+function s11(){
+  const f=cur;
+  const culturesNom=f.cultures.filter(c=>c.nom).map(c=>c.nom).join(", ")||"—";
+  const SR=(l,v)=>h("div",{class:"sr"},h("span",{class:"sl"},l),h("span",{class:"sv"},v||"—"));
+  return h("div",{},
+    crd("✅ Récapitulatif",
+      SR("Numéro de fiche",f.id_enq),SR("Stagiaire",f.stagiaire),SR("Commune",f.commune),
+      SR("Surface totale",f.surf_totale&&f.surf_totale+" ha"),SR("Surface en production",f.surf_prod&&f.surf_prod+" ha"),
+      SR("Emploi extérieur",f.emploi_ext),SR("MO externe",f.mo_externe),
+      SR("Élevage",f.elevage),SR("Nb parcelles",f.nb_parcelles),
+      SR("Cultures renseignées",culturesNom)
+    ),
+    crd("📝 Notes de l'enquêteur",
+      fld("Observations générales, points importants",false,null,ta(f.notes,"notes","Ce que tu as observé sur le terrain, points importants…")),
+      row2(fld("Coordonnées GPS",false,null,inp(f.gps,"gps",{placeholder:"ex: 14.652, -61.024"})),
+           fld("Références photos",false,null,inp(f.photos,"photos",{placeholder:"ex: ENQ_001_parcelle.jpg"})))
+    ),
+    h("button",{class:"nsv",style:"width:100%;margin-top:4px",onclick:()=>{
+      const blob=new Blob([JSON.stringify(cur,null,2)],{type:"application/json"});
+      const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+      a.download=(cur.id_enq||"fiche")+"_sysdiv.json";a.click();
+    }},"⬇ Exporter cette fiche (JSON)")
+  );
+}
+
+function renderStep(){
+  switch(STEPS[step].id){
+    case"s1":return s1();
+    case"s2":return s2();
+    case"s3":return s3();
+    case"s4":return s4();
+    case"s5":return s5();
+    case"s6":return sCulture(0);
+    case"s7":return sCulture(1);
+    case"s8":return sCulture(2);
+    case"s9":return sCulture(3);
+    case"s10":return sCulture(4);
+    case"s11":return s11();
+  }
+}
+
+function render(){
+  const app=document.getElementById("app");app.innerHTML="";
+  if(view==="list"){renderList(app);return;}
+  const top=h("div",{class:"top"},
+    h("button",{class:"tbtn",onclick:()=>{view="list";render();}},"← Fiches"),
+    h("div",{class:"top-info"},
+      h("h1",{},cur.id_enq||"Nouvelle fiche"),
+      h("p",{},"Étape "+(step+1)+" / "+STEPS.length+" · "+STEPS[step].l)
+    ),
+    h("button",{class:"tbtn",onclick:saveCur},"💾 Sauv.")
+  );
+  app.appendChild(top);
+  app.appendChild(h("div",{class:"prog"},h("div",{class:"pf",style:"width:"+((step+1)/STEPS.length*100)+"%"})));
+  const tabs=h("div",{class:"tabs"});
+  STEPS.forEach((s,i)=>{
+    const t=h("div",{class:"tab"+(i===step?" active":done.has(i)?" done":"")},s.ic+" "+s.l);
+    t.onclick=()=>{step=i;render();};
+    tabs.appendChild(t);
+  });
+  app.appendChild(tabs);
+  const cnt=h("div",{class:"cnt"});
+  cnt.appendChild(renderStep());
+  if(step===STEPS.length-1&&cur){setTimeout(()=>injectSendButton(cur),50);}
+  app.appendChild(cnt);
+  const nav=h("div",{class:"nav"});
+  if(step>0)nav.appendChild(h("button",{class:"nbk",onclick:()=>{step--;render();window.scrollTo(0,0);}},"← Retour"));
+  if(step<STEPS.length-1)nav.appendChild(h("button",{class:"nnx",onclick:()=>{done.add(step);step++;render();window.scrollTo(0,0);}},"Suivant →"));
+  else nav.appendChild(h("button",{class:"nsv",onclick:async()=>{saveCur();view="list";render();}},"✓ Enregistrer"));
+  app.appendChild(nav);
+}
+
+function renderList(app){
+  const top=h("div",{class:"top"},
+    h("div",{class:"top-info"},
+      h("h1",{},"🌿 TDS2A — Systèmes Diversifiés"),
+      h("p",{},"Martinique · "+fiches.length+" fiche(s) sauvegardée(s)")
+    ),
+    fiches.length>0?h("button",{class:"tbtn",onclick:exportAll},"⬇ Tout exporter"):null
+  );
+  app.appendChild(top);
+  const cnt=h("div",{class:"cnt"});
+  if(fiches.length===0){
+    cnt.appendChild(h("div",{class:"empty"},
+      h("div",{class:"empty-icon"},"🌿"),
+      h("div",{class:"empty-title"},"Aucune fiche encore"),
+      h("div",{class:"empty-sub"},"Commencer la collecte terrain"),
+      h("button",{class:"new-btn",onclick:newFiche},"+ Nouvelle fiche exploitation")
+    ));
+  } else {
+    cnt.appendChild(h("button",{class:"new-btn",onclick:newFiche},"+ Nouvelle fiche exploitation"));
+    [...fiches].reverse().forEach(f=>{
+      const fc=h("div",{class:"fc"},
+        h("div",{style:"display:flex;justify-content:space-between;align-items:flex-start"},
+          h("div",{style:"flex:1",onclick:()=>openFiche(f.id)},
+            h("div",{class:"fi"},f.id_enq||"Sans numéro"),
+            h("div",{class:"fe"},f.commune||"Commune non renseignée"),
+            h("div",{class:"ft"},
+              f.commune?h("span",{class:"badge"},f.commune):null,
+              f.stagiaire?h("span",{class:"badge badge-n"},f.stagiaire):null,
+              f.date?h("span",{class:"badge badge-n"},f.date):null,
+              f.surf_totale?h("span",{class:"badge"},f.surf_totale+" ha"):null
+            )
+          ),
+          h("button",{class:"db",onclick:e=>{e.stopPropagation();deleteFiche(f.id)}},"✕")
+        )
+      );
+      cnt.appendChild(fc);
+    });
+  }
+  app.appendChild(cnt);
+}
+
+function newFiche(){cur=blank();step=0;done=new Set();view="form";render();}
+function openFiche(id){
+  const f=fiches.find(x=>x.id===id);if(!f)return;
+  cur=JSON.parse(JSON.stringify(f));
+  step=0;done=new Set(STEPS.map((_,i)=>i));view="form";render();
+}
+function deleteFiche(id){
+  if(!confirm("Supprimer cette fiche ?"))return;
+  fiches=fiches.filter(f=>f.id!==id);saveFiches(fiches);render();
+}
+function saveCur(){
+  if(!cur)return;
+  const u={...cur,saved_at:new Date().toISOString()};
+  const i=fiches.findIndex(f=>f.id===u.id);
+  if(i>=0)fiches[i]=u;else fiches.push(u);
+  saveFiches(fiches);cur=u;
+}
+function exportAll(){
+  const blob=new Blob([JSON.stringify(fiches,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="TDS2A_SysDiversifies_"+today()+".json";a.click();
+}
+
+// GOOGLE SHEETS
+const APPS_SCRIPT_URL="https://script.google.com/macros/s/AKfycbwmhGf3H-A4A9rPbbAbAK6hLAiVXfkf24hbZjZQeF2JKXc9-lmlHqRAUCZkzg58nClkYA/exec";
+async function sendToSheets(fiche){
+  const btn=document.getElementById("send-btn");
+  const msg=document.getElementById("send-msg");
+  if(!btn||!msg)return;
+  btn.disabled=true;btn.textContent="⏳ Envoi en cours…";msg.textContent="";
+  try{
+    await fetch(APPS_SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},body:JSON.stringify(fiche)});
+    btn.textContent="✓ Envoyé à Google Sheets !";btn.style.background="#2E7D32";
+    msg.textContent="✓ Fiche reçue — ID : "+(fiche.id_enq||"?");msg.style.color="#2E7D32";
+    const idx=fiches.findIndex(f=>f.id===fiche.id);
+    if(idx>=0){fiches[idx].sent_to_sheets=true;saveFiches(fiches);}
+  }catch(err){
+    btn.textContent="⚠ Erreur — réessayer";btn.disabled=false;btn.style.background="#C62828";
+    msg.textContent="Vérifier la connexion internet.";msg.style.color="#C62828";
+  }
+}
+function injectSendButton(fiche){
+  const existing=document.getElementById("send-zone");if(existing)existing.remove();
+  const zone=document.createElement("div");zone.id="send-zone";zone.style.cssText="margin:12px 14px 4px;";
+  const btn=document.createElement("button");btn.id="send-btn";
+  const sent=fiche&&fiche.sent_to_sheets;
+  btn.textContent=sent?"✓ Déjà envoyé — renvoyer ?":"📤 Envoyer à Google Sheets";
+  btn.style.cssText="width:100%;padding:14px;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;border:none;background:"+(sent?"#2E7D32":"#1565C0")+";color:#fff;font-family:inherit;margin-bottom:8px;display:block;";
+  btn.onclick=()=>sendToSheets(fiche);
+  const msg=document.createElement("div");msg.id="send-msg";msg.style.cssText="font-size:12px;text-align:center;padding:4px;font-weight:500;min-height:18px;";
+  if(sent){msg.textContent="✓ Cette fiche a déjà été envoyée au Google Sheet.";msg.style.color="#2E7D32";}
+  zone.appendChild(btn);zone.appendChild(msg);
+  const nav=document.querySelector(".nav");if(nav)nav.parentNode.insertBefore(zone,nav);
+}
+
+load();render();
+</script>
+</body>
+</html>
