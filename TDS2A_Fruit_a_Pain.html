@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<title>TDS2A – Fruit à Pain</title>
+<style>
+:root{--c:#c26a1a;--cc:#e8843a;--cp:#fde8d0;--ct:#7a3e00;--gris:#f4f4f0;--gris-b:#c8c8c0;--rouge:#c0392b;--ombre:0 2px 8px rgba(0,0,0,.12);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#fef6ee;color:#1a1a1a;font-size:15px;min-height:100vh;}
+#app-header{background:var(--c);color:white;padding:14px 16px 10px;position:sticky;top:0;z-index:100;box-shadow:var(--ombre);}
+#app-header h1{font-size:16px;font-weight:700;}
+#app-header p{font-size:11px;opacity:.8;margin-top:2px;}
+#progress-bar-wrap{background:rgba(255,255,255,.2);height:4px;margin-top:10px;border-radius:2px;}
+#progress-bar{height:4px;background:#e9c46a;border-radius:2px;transition:width .4s;}
+#step-label{font-size:11px;opacity:.75;margin-top:4px;}
+#nav-pills{display:flex;gap:6px;padding:10px 16px 4px;overflow-x:auto;background:var(--c);scrollbar-width:none;}
+#nav-pills::-webkit-scrollbar{display:none;}
+.pill{flex-shrink:0;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid rgba(255,255,255,.3);color:rgba(255,255,255,.7);background:transparent;transition:all .2s;white-space:nowrap;}
+.pill.active{background:white;color:var(--c);border-color:white;}
+.pill.done{background:var(--cc);color:white;border-color:var(--cc);}
+#main{padding:14px 14px 100px;}
+.step{display:none;}.step.active{display:block;}
+.card{background:white;border-radius:10px;margin-bottom:14px;box-shadow:var(--ombre);overflow:hidden;}
+.card-title{background:var(--c);color:white;padding:10px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.card-body{padding:12px 14px;}
+.subsection{font-size:12px;font-weight:700;color:var(--c);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px;padding-bottom:4px;border-bottom:1.5px solid var(--cp);}
+.subsection:first-child{margin-top:0;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:#333;}
+.req{color:var(--rouge);margin-left:2px;}
+.nsp-btn{float:right;font-size:10px;font-weight:600;background:var(--gris);border:1px solid var(--gris-b);border-radius:4px;padding:2px 6px;cursor:pointer;color:#666;}
+.nsp-btn.active{background:#e9c46a;border-color:#e9c46a;}
+.field input[type=text],.field input[type=number],.field select,.field textarea{width:100%;border:1.5px solid var(--gris-b);border-radius:7px;padding:9px 11px;font-size:14px;font-family:inherit;background:var(--gris);transition:border-color .2s;appearance:none;-webkit-appearance:none;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--cc);background:white;}
+.field textarea{min-height:70px;resize:vertical;}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.row-unit{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;}
+.unit-label{font-size:12px;color:#666;padding-bottom:11px;white-space:nowrap;}
+.radio-group,.check-group{display:flex;flex-direction:column;gap:7px;}
+.radio-group.inline,.check-group.inline{flex-direction:row;flex-wrap:wrap;gap:8px;}
+.radio-item,.check-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid var(--gris-b);border-radius:8px;cursor:pointer;font-size:13px;background:var(--gris);transition:all .15s;}
+.radio-item input,.check-item input{accent-color:var(--c);width:16px;height:16px;}
+.radio-item:has(input:checked),.check-item:has(input:checked){border-color:var(--cc);background:var(--cp);font-weight:600;}
+.radio-item.sm{padding:6px 10px;font-size:12px;flex:1;min-width:80px;justify-content:center;}
+.info-box{background:#fef6ee;border-left:3px solid var(--c);border-radius:0 6px 6px 0;padding:9px 12px;font-size:12px;color:var(--ct);margin-bottom:12px;}
+.parc-table{border-collapse:collapse;width:100%;font-size:12px;}
+.parc-table th{background:var(--cp);color:var(--c);padding:7px 8px;font-weight:700;font-size:11px;border:1px solid #ddd;text-align:left;white-space:nowrap;}
+.parc-table td{border:1px solid #e0d8e8;padding:4px 5px;vertical-align:middle;}
+.parc-table td.num{background:#fef6ee;font-weight:700;font-size:12px;color:var(--c);text-align:center;width:28px;}
+.parc-table td.rc{background:#fef6ee;font-weight:600;font-size:11px;color:var(--c);white-space:nowrap;padding:5px 8px;}
+.parc-table td input,.parc-table td select{width:100%;border:1px solid #ccc;border-radius:5px;padding:5px 6px;font-size:12px;background:white;}
+.cal-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.cal-table{border-collapse:collapse;min-width:520px;width:100%;font-size:11px;}
+.cal-table th{background:var(--c);color:white;padding:5px 4px;text-align:center;font-weight:700;}
+.cal-table td{border:1px solid #ddd;padding:4px 3px;vertical-align:middle;}
+.cal-table td.op-label{font-weight:600;font-size:11px;background:var(--gris);padding:4px 8px;white-space:nowrap;}
+.cal-table td input[type=checkbox]{width:16px;height:16px;display:block;margin:0 auto;accent-color:var(--c);}
+.cal-table tr:nth-child(even) td{background:#fafaf8;}
+.arbre-block{border:2px solid var(--cp);border-radius:10px;margin-bottom:12px;overflow:hidden;}
+.arbre-header{background:var(--cp);padding:11px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:13px;color:var(--c);user-select:none;}
+.arbre-header .ti{font-size:16px;transition:transform .25s;}
+.arbre-header.open .ti{transform:rotate(180deg);}
+.arbre-body{display:none;padding:14px;background:white;}
+.arbre-body.open{display:block;}
+.sub-section-title{font-size:12px;font-weight:800;color:var(--c);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px;padding:6px 10px;background:var(--cp);border-radius:6px;}
+.sub-section-title:first-child{margin-top:0;}
+.prod-block{background:#fef6ee;border:1px solid #ddd;border-radius:8px;padding:10px;margin-bottom:8px;}
+.prod-title{font-weight:700;font-size:12px;color:var(--c);margin-bottom:8px;}
+.util-table{border-collapse:collapse;width:100%;font-size:12px;}
+.util-table th{background:var(--cp);color:var(--c);padding:7px 8px;font-weight:700;font-size:11px;border:1px solid #ddd;text-align:left;white-space:nowrap;}
+.util-table td{border:1px solid #e0d8e8;padding:5px 6px;vertical-align:middle;}
+.util-table td input,.util-table td select{width:100%;border:1px solid #ccc;border-radius:5px;padding:5px 6px;font-size:12px;background:white;}
+.util-table td.uc{background:#fef6ee;font-weight:700;font-size:11px;color:var(--c);}
+#btn-bar{position:fixed;bottom:0;left:0;right:0;background:white;padding:10px 16px;display:flex;gap:10px;box-shadow:0 -2px 12px rgba(0,0,0,.12);z-index:200;}
+.btn{flex:1;padding:12px;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;}
+.btn-prev{background:var(--gris);color:#555;border:1.5px solid var(--gris-b);}
+.btn-next{background:var(--c);color:white;}
+.btn-send{background:#e9c46a;color:#1a1a1a;}
+.btn:active{transform:scale(.97);}
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#222;color:white;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .3s;z-index:300;pointer-events:none;white-space:nowrap;}
+#toast.show{opacity:1;}
+@media(max-width:420px){.row-3{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+<div id="app-header">
+  <h1>🍞 TDS2A — Fruit à Pain — Martinique</h1>
+  <p>Projet ANR TDS2A — CIRAD / ART-Dev</p>
+  <div id="progress-bar-wrap"><div id="progress-bar" style="width:20%"></div></div>
+  <div id="step-label">Étape 1 / 5</div>
+</div>
+<div id="nav-pills">
+  <button class="pill active" onclick="goTo(0)">1. Exploitation</button>
+  <button class="pill" onclick="goTo(1)">2. Parcelles</button>
+  <button class="pill" onclick="goTo(2)">3. Variétés</button>
+  <button class="pill" onclick="goTo(3)">4. Transformation</button>
+  <button class="pill" onclick="goTo(4)">5. Économie</button>
+</div>
+<div id="main">
+
+<!-- ===== ÉTAPE 1 : EXPLOITATION ===== -->
+<div class="step active" id="step-0">
+  <div class="card">
+    <div class="card-title"><span>🏡</span> Identification de l'exploitation</div>
+    <div class="card-body">
+      <div class="subsection">Identification</div>
+      <div class="field"><label>Identifiant enquêté ★</label><input type="text" id="id_enquete" placeholder="Code anonyme ex. MQ-001"></div>
+      <div class="field"><label>Principales productions ★</label>
+        <textarea id="princ_productions" placeholder="ex. Fruit à pain, Mangue, Banane, Maraîchage..." style="min-height:60px;"></textarea></div>
+      <div class="row-2">
+        <div class="field"><label>Commune ★</label>
+          <select id="commune">
+            <option value="">— Choisir —</option>
+            <option>Ajoupa-Bouillon</option><option>Anses-d'Arlet</option><option>Basse-Pointe</option>
+            <option>Bellefontaine</option><option>Case-Pilote</option><option>Ducos</option>
+            <option>Fort-de-France</option><option>Grand'Rivière</option><option>Gros-Morne</option>
+            <option>Le Carbet</option><option>Le Diamant</option><option>Le François</option>
+            <option>Le Lamentin</option><option>Le Lorrain</option><option>Le Marigot</option>
+            <option>Le Marin</option><option>Le Morne-Rouge</option><option>Le Robert</option>
+            <option>Le Saint-Esprit</option><option>Le Vauclin</option><option>Les Trois-Îlets</option>
+            <option>Rivière-Pilote</option><option>Rivière-Salée</option><option>Sainte-Anne</option>
+            <option>Sainte-Luce</option><option>Sainte-Marie</option><option>Saint-Joseph</option>
+            <option>Saint-Pierre</option><option>Schoelcher</option><option>Trinité</option>
+            <option>Autre</option>
+          </select>
+        </div>
+        <div class="field"><label>Quartier / lieu-dit <span class="nsp-btn" onclick="toggleNsp(this)">NSP</span></label>
+          <input type="text" id="lieu_dit" placeholder="Quartier ou hameau"></div>
+      </div>
+      <div class="field"><label>Topographie ★</label>
+        <div class="radio-group inline">
+          <label class="radio-item sm"><input type="radio" name="topo" value="Plaine"> Plaine</label>
+          <label class="radio-item sm"><input type="radio" name="topo" value="Mi-pente"> Mi-pente</label>
+          <label class="radio-item sm"><input type="radio" name="topo" value="Pente importante"> Pente importante</label>
+        </div>
+      </div>
+      <div class="subsection">Surfaces</div>
+      <div class="row-2">
+        <div class="field"><label>Surface totale exploitation <span class="nsp-btn" onclick="toggleNsp(this)">NSP</span></label>
+          <div class="row-unit"><input type="number" id="surf_totale" placeholder="0.0" step="0.1" min="0"><span class="unit-label">ha</span></div></div>
+        <div class="field"><label>Nb de parcelles ★</label>
+          <input type="number" id="nb_parcelles" placeholder="0" min="0"></div>
+      </div>
+      <div class="field"><label>Statut foncier ★</label>
+        <div class="check-group inline">
+          <label class="check-item"><input type="checkbox" name="foncier" value="Propriété"> Propriété</label>
+          <label class="check-item"><input type="checkbox" name="foncier" value="Fermage"> Fermage</label>
+          <label class="check-item"><input type="checkbox" name="foncier" value="Prêt familial"> Prêt familial</label>
+          <label class="check-item"><input type="checkbox" name="foncier" value="Occupation"> Occupation informelle</label>
+        </div>
+      </div>
+      <div class="subsection">Profil</div>
+      <div class="row-2">
+        <div class="field"><label>Tranche d'âge ★</label>
+          <select id="tranche_age"><option value="">—</option>
+            <option>Moins de 30 ans</option><option>30–45 ans</option>
+            <option>45–60 ans</option><option>Plus de 60 ans</option>
+          </select>
+        </div>
+        <div class="field"><label>Activité principale ★</label>
+          <select id="activite"><option value="">—</option>
+            <option>Agriculture</option><option>Extra-agricole</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Type de conduite ★</label>
+        <div class="radio-group inline">
+          <label class="radio-item sm"><input type="radio" name="conduite" value="Bio"> Bio</label>
+          <label class="radio-item sm"><input type="radio" name="conduite" value="Agroécologique"> Agroécologique</label>
+          <label class="radio-item sm"><input type="radio" name="conduite" value="Raisonné"> Raisonné</label>
+          <label class="radio-item sm"><input type="radio" name="conduite" value="Conventionnel"> Conventionnel</label>
+          <label class="radio-item sm"><input type="radio" name="conduite" value="Autre"> Autre</label>
+        </div>
+        <input type="text" id="conduite_autre" placeholder="Préciser si autre" style="margin-top:8px;">
+      </div>
+      <div class="field"><label>Appartenance groupement / coop.</label>
+        <div class="radio-group inline">
+          <label class="radio-item sm"><input type="radio" name="groupement" value="Oui"> Oui</label>
+          <label class="radio-item sm"><input type="radio" name="groupement" value="Non"> Non</label>
+        </div>
+      </div>
+      <div class="field"><label>Nom du groupement</label><input type="text" id="nom_groupement" placeholder=""></div>
+      <div class="field"><label>Date d'enquête ★</label><input type="text" id="date_enquete" placeholder="jj/mm/aaaa"></div>
+      <div class="field"><label>Enquêteur ★</label><input type="text" id="enqueteur" placeholder="Prénom Nom"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ÉTAPE 2 : PARCELLES ===== -->
+<div class="step" id="step-1">
+  <div class="card">
+    <div class="card-title"><span>🗺️</span> Parcelles</div>
+    <div class="card-body">
+      <div class="info-box">Lister les parcelles avec production fruitière. Laisser vide si moins de 10 parcelles.</div>
+      <div class="cal-wrap">
+      <table class="parc-table">
+        <thead><tr>
+          <th>#</th><th>Nom / numéro</th><th>Surface (ha)</th>
+          <th>Culture principale</th>
+          <th>Espèce 1</th><th>Nb d'arbres 1</th>
+          <th>Espèce 2</th><th>Nb d'arbres 2</th>
+          <th>Espèce 3</th><th>Nb d'arbres 3</th>
+          <th>Remarques</th>
+        </tr></thead>
+        <tbody id="parc-tbody"></tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ÉTAPE 3 : VARIÉTÉS / ARBRES ===== -->
+<div class="step" id="step-2">
+  <div class="card">
+    <div class="card-title"><span>🌿</span> Fiches variétés (5 max)</div>
+    <div class="card-body">
+      <div class="info-box">Chaque fiche : phénologie, taille, fertilisation, irrigation, récolte et utilisation pour une variété.</div>
+      <div id="arbres-container"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== ÉTAPE 4 : TRANSFORMATION ===== -->
+<div class="step" id="step-3">
+  <div class="card">
+    <div class="card-title"><span>⚙️</span> Transformation du fruit à pain</div>
+    <div class="card-body">
+      <div class="info-box">Réf. PARM 2024 : 10 kg de fruits frais → 1 kg de farine (~10 %). Renseigner pour chaque produit transformé.</div>
+
+      <div class="subsection">Produits transformés</div>
+      <div class="cal-wrap"><table class="parc-table">
+        <thead><tr>
+          <th>Produit</th><th>Pratiqué</th>
+          <th>Transformé par</th><th>Lieu</th>
+          <th>Produit final (texte libre)</th>
+          <th>Coeff. (kg fini / kg frais)</th>
+          <th>Qté produite / an (kg)</th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="rc">Farine</td>
+            <td><select><option>Non</option><option>Oui</option></select></td>
+            <td><select><option>Producteur</option><option>Intermédiaire</option><option>Coopérative</option><option>Industriel</option></select></td>
+            <td><select><option>Sur place</option><option>Ailleurs</option></select></td>
+            <td><input type="text" placeholder="Farine de fruit à pain"></td>
+            <td><input type="number" placeholder="0.10" step="0.01" title="Réf. PARM : ~0.10"></td>
+            <td><input type="number" placeholder=""></td></tr>
+          <tr><td class="rc">Chips / galettes</td>
+            <td><select><option>Non</option><option>Oui</option></select></td>
+            <td><select><option>Producteur</option><option>Intermédiaire</option><option>Coopérative</option><option>Industriel</option></select></td>
+            <td><select><option>Sur place</option><option>Ailleurs</option></select></td>
+            <td><input type="text" placeholder="Chips de fruit à pain"></td>
+            <td><input type="number" placeholder="" step="0.01"></td>
+            <td><input type="number" placeholder=""></td></tr>
+          <tr><td class="rc">Fruits cuits / bouillis</td>
+            <td><select><option>Non</option><option>Oui</option></select></td>
+            <td><select><option>Producteur</option><option>Intermédiaire</option></select></td>
+            <td><select><option>Sur place</option><option>Ailleurs</option></select></td>
+            <td><input type="text" placeholder="Fruit à pain cuit"></td>
+            <td><input type="number" placeholder="" step="0.01"></td>
+            <td><input type="number" placeholder=""></td></tr>
+          <tr><td class="rc">Fermenté (poi)</td>
+            <td><select><option>Non</option><option>Oui</option></select></td>
+            <td><select><option>Producteur</option><option>Intermédiaire</option></select></td>
+            <td><select><option>Sur place</option><option>Ailleurs</option></select></td>
+            <td><input type="text" placeholder="Poi / pâte fermentée"></td>
+            <td><input type="number" placeholder="" step="0.01"></td>
+            <td><input type="number" placeholder=""></td></tr>
+          <tr><td class="rc">Congelé (portions)</td>
+            <td><select><option>Non</option><option>Oui</option></select></td>
+            <td><select><option>Producteur</option><option>Intermédiaire</option></select></td>
+            <td><select><option>Sur place</option><option>Ailleurs</option></select></td>
+            <td><input type="text" placeholder="Fruit à pain congelé"></td>
+            <td><input type="number" placeholder="" step="0.01"></td>
+            <td><input type="number" placeholder=""></td></tr>
+          <tr><td class="rc">Autre</td>
+            <td><select><option>Non</option><option>Oui</option></select></td>
+            <td><select><option>Producteur</option><option>Intermédiaire</option><option>Coopérative</option><option>Industriel</option></select></td>
+            <td><select><option>Sur place</option><option>Ailleurs</option></select></td>
+            <td><input type="text" placeholder="Décrire le produit"></td>
+            <td><input type="number" placeholder="" step="0.01"></td>
+            <td><input type="number" placeholder=""></td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="subsection">Équipements de transformation</div>
+      <div class="cal-wrap"><table class="parc-table">
+        <thead><tr><th>Équipement</th><th>Nb</th><th>Source énergie</th><th>h utilisées/an</th><th>Propre / Prestataire</th><th>Coût €/an</th></tr></thead>
+        <tbody>
+          <tr><td class="rc">Séchoir solaire</td><td><input type="number" placeholder="0"></td><td><select><option>Solaire</option></select></td><td><input type="number" placeholder=""></td><td><select><option>Propre</option><option>Prestataire</option></select></td><td><input type="number" placeholder=""></td></tr>
+          <tr><td class="rc">Séchoir électrique</td><td><input type="number" placeholder="0"></td><td><select><option>Électrique</option></select></td><td><input type="number" placeholder=""></td><td><select><option>Propre</option><option>Prestataire</option></select></td><td><input type="number" placeholder=""></td></tr>
+          <tr><td class="rc">Séchoir à bois</td><td><input type="number" placeholder="0"></td><td><select><option>Bois</option></select></td><td><input type="number" placeholder=""></td><td><select><option>Propre</option><option>Prestataire</option></select></td><td><input type="number" placeholder=""></td></tr>
+          <tr><td class="rc">Broyeur / moulin à farine</td><td><input type="number" placeholder="0"></td><td><select><option>Électrique</option><option>Thermique</option><option>Manuel</option></select></td><td><input type="number" placeholder=""></td><td><select><option>Propre</option><option>Prestataire</option></select></td><td><input type="number" placeholder=""></td></tr>
+          <tr><td class="rc">Trancheuse</td><td><input type="number" placeholder="0"></td><td><select><option>Électrique</option><option>Manuel</option></select></td><td><input type="number" placeholder=""></td><td><select><option>Propre</option><option>Prestataire</option></select></td><td><input type="number" placeholder=""></td></tr>
+          <tr><td class="rc">Friteuse</td><td><input type="number" placeholder="0"></td><td><select><option>Électrique</option><option>Gaz</option></select></td><td><input type="number" placeholder=""></td><td><select><option>Propre</option><option>Prestataire</option></select></td><td><input type="number" placeholder=""></td></tr>
+          <tr><td class="rc">Congélateur</td><td><input type="number" placeholder="0"></td><td><select><option>Électrique</option></select></td><td><input type="number" placeholder=""></td><td><select><option>Propre</option><option>Prestataire</option></select></td><td><input type="number" placeholder=""></td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="subsection">Emballages & conditionnement</div>
+      <div class="cal-wrap"><table class="parc-table">
+        <thead><tr><th>Type</th><th>Qté utilisée/an</th><th>Unité</th><th>Coût €/an</th></tr></thead>
+        <tbody>
+          <tr><td class="rc">Sachets plastique</td><td><input type="number" placeholder=""></td><td><select><option>kg</option><option>unités</option></select></td><td><input type="number" placeholder=""></td></tr>
+          <tr><td class="rc">Emballages carton</td><td><input type="number" placeholder=""></td><td><select><option>kg</option><option>unités</option></select></td><td><input type="number" placeholder=""></td></tr>
+          <tr><td class="rc">Étiquettes</td><td><input type="number" placeholder=""></td><td><select><option>unités</option></select></td><td><input type="number" placeholder=""></td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="subsection">Déchets de transformation</div>
+      <div class="cal-wrap"><table class="parc-table">
+        <thead><tr><th>Type de déchet</th><th>Qté estimée kg/an</th><th>Valorisation</th></tr></thead>
+        <tbody>
+          <tr><td class="rc">Épluchures / cœurs</td><td><input type="number" placeholder=""></td>
+            <td><select><option>Compost</option><option>Alimentation animale</option><option>Décharge</option><option>Autre</option></select></td></tr>
+          <tr><td class="rc">Fruits déclassés</td><td><input type="number" placeholder=""></td>
+            <td><select><option>Compost</option><option>Alimentation animale</option><option>Décharge</option><option>Autre</option></select></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ÉTAPE 5 : ÉCONOMIE ===== -->
+<div class="step" id="step-4">
+  <div class="card">
+    <div class="card-title"><span>💶</span> Économie & observations</div>
+    <div class="card-body">
+      <div class="subsection">Lieu de vente</div>
+      <div class="check-group">
+        <label class="check-item"><input type="checkbox" name="lieu_vente" value="Intermédiaire"> Intermédiaire</label>
+        <label class="check-item"><input type="checkbox" name="lieu_vente" value="Marché"> Marché</label>
+        <label class="check-item"><input type="checkbox" name="lieu_vente" value="GMS"> GMS (Grande et Moyenne Surface)</label>
+        <label class="check-item"><input type="checkbox" name="lieu_vente" value="Collectivité"> Collectivité</label>
+        <label class="check-item"><input type="checkbox" name="lieu_vente" value="Direct au consommateur"> Direct au consommateur</label>
+        <label class="check-item"><input type="checkbox" name="lieu_vente" value="Autre"> Autre</label>
+      </div>
+      <div class="field" style="margin-top:10px;"><label>Préciser (si autre)</label>
+        <input type="text" id="lieu_vente_autre" placeholder=""></div>
+      <div class="subsection">Résultats économiques</div>
+      <div class="row-2">
+        <div class="field"><label>CA estimé <span class="nsp-btn" onclick="toggleNsp(this)">NSP</span></label>
+          <div class="row-unit"><input type="number" id="ca_estime" placeholder=""><span class="unit-label">€/an</span></div></div>
+        <div class="field"><label>Revenu net estimé <span class="nsp-btn" onclick="toggleNsp(this)">NSP</span></label>
+          <div class="row-unit"><input type="number" id="revenu_net" placeholder=""><span class="unit-label">€/an</span></div></div>
+      </div>
+      <div class="field"><label>Distance exploitation → vente <span class="nsp-btn" onclick="toggleNsp(this)">NSP</span></label>
+        <div class="row-unit"><input type="number" id="dist_vente" placeholder="0"><span class="unit-label">km</span></div></div>
+      <div class="subsection">Observations</div>
+      <div class="field"><label>Observations générales</label>
+        <textarea id="obs_generale" placeholder="Contexte, fiabilité des données, points à vérifier..."></textarea></div>
+      <div class="field"><label>Contraintes principales</label>
+        <textarea id="contraintes" placeholder=""></textarea></div>
+    </div>
+  </div>
+</div>
+
+</div>
+<div id="btn-bar">
+  <button class="btn btn-prev" id="btn-prev" onclick="prevStep()">← Précédent</button>
+  <button class="btn btn-next" id="btn-next" onclick="nextStep()">Suivant →</button>
+</div>
+<div id="toast"></div>
+
+<script>
+const TOTAL_STEPS = 5;
+let currentStep = 0;
+const KEY = 'tds2a_fap_v3';
+
+
+function arbreContent(i) {
+  const mois = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  const calRows = [
+    'Floraison','Fructification','Récolte principale','Récolte secondaire',
+    'Taille / entretien','Fertilisation','Traitement phyto'
+  ];
+  const calHTML = calRows.map(op =>
+    `<tr><td class="op-label">${op}</td>` +
+    mois.map(() => `<td><input type="checkbox"></td>`).join('') +
+    `</tr>`
+  ).join('');
+
+  const types = ['Minéral','Organique','Organo-minéral'];
+  const origines = ['Acheté','Fait maison','Don'];
+  const phytoTypes = ['Insecticide','Fongicide','Herbicide','Biocontrôle'];
+
+  const fertiProd = [1,2,3].map(n => `
+    <div class="prod-block">
+      <div class="prod-title">Produit fertilisant ${n}</div>
+      <div class="row-2">
+        <div class="field"><label>Nom ★</label><input type="text" placeholder="Nom commercial"></div>
+        <div class="field"><label>Type ★</label><select><option value="">—</option>${types.map(t=>`<option>${t}</option>`).join('')}</select></div>
+      </div>
+      <div class="row-3">
+        <div class="field"><label>Origine ★</label><select><option value="">—</option>${origines.map(o=>`<option>${o}</option>`).join('')}</select></div>
+        <div class="field"><label>Dose/arbre ★</label><input type="text" placeholder="kg ou L"></div>
+        <div class="field"><label>Prix €/unité ★</label><input type="number" placeholder="0" step="0.1"></div>
+      </div>
+    </div>`).join('');
+
+  const phytoProd = [1,2,3].map(n => `
+    <div class="prod-block">
+      <div class="prod-title">Produit phyto ${n}</div>
+      <div class="row-2">
+        <div class="field"><label>Nom ★</label><input type="text" placeholder="Nom commercial"></div>
+        <div class="field"><label>Type ★</label><select><option value="">—</option>${phytoTypes.map(t=>`<option>${t}</option>`).join('')}</select></div>
+      </div>
+      <div class="row-3">
+        <div class="field"><label>Origine ★</label><select><option value="">—</option>${origines.map(o=>`<option>${o}</option>`).join('')}</select></div>
+        <div class="field"><label>Dose/arbre ★</label><input type="text" placeholder="L ou g"></div>
+        <div class="field"><label>Prix €/unité ★</label><input type="number" placeholder="0" step="0.1"></div>
+      </div>
+    </div>`).join('');
+
+  return `
+  <div class="sub-section-title">🌿 Description</div>
+  <div class="row-2">
+    <div class="field"><label>Espèce / variété ★</label>
+      <input type="text" placeholder="ex. Maafala, Yellow, Mangue..."></div>
+    <div class="field"><label>Nom local</label>
+      <input type="text" placeholder="Nom local si connu"></div>
+  </div>
+  <div class="row-2">
+    <div class="field"><label>Âge <span class="nsp-btn" onclick="toggleNsp(this)">NSP</span></label>
+      <div class="row-unit"><input type="number" placeholder="0" min="0"><span class="unit-label">ans</span></div></div>
+    <div class="field"><label>En production ★</label>
+      <select><option value="">—</option><option>Oui</option><option>Non</option></select></div>
+  </div>
+  <div class="row-2">
+    <div class="field"><label>Parcelle associée (N°)</label>
+      <input type="number" placeholder="" min="1" max="10"></div>
+    <div class="field"><label>Hauteur approx. <span class="nsp-btn" onclick="toggleNsp(this)">NSP</span></label>
+      <div class="row-unit"><input type="number" placeholder="0" step="0.5"><span class="unit-label">m</span></div></div>
+  </div>
+  <div class="row-2">
+    <div class="field"><label>Nb d'arbres sur la parcelle <span class="nsp-btn" onclick="toggleNsp(this)">NSP</span></label>
+      <input type="number" placeholder="0" min="0"></div>
+    <div class="field"><label>Distance entre les arbres <span class="nsp-btn" onclick="toggleNsp(this)">NSP</span></label>
+      <div class="row-unit"><input type="number" placeholder="0" step="0.5"><span class="unit-label">m</span></div></div>
+  </div>
+  <div class="field"><label>Origine du plant ★</label>
+    <div class="radio-group inline">
+      <label class="radio-item sm"><input type="radio" name="orig_${i}" value="Marché"> Marché</label>
+      <label class="radio-item sm"><input type="radio" name="orig_${i}" value="Voisin"> Voisin</label>
+      <label class="radio-item sm"><input type="radio" name="orig_${i}" value="Autoproduction"> Autoprod.</label>
+      <label class="radio-item sm"><input type="radio" name="orig_${i}" value="Pépinière"> Pépinière</label>
+    </div></div>
+  <div class="field"><label>Cultures associées / ombrage</label>
+    <input type="text" placeholder="Espèces intercalaires ou ombrage"></div>
+
+  <div class="sub-section-title">📅 Phénologie & calendrier</div>
+  <div class="info-box">Cocher les mois d'activité. Réf. Nacitas 2012 : 16–17 sem. floraison → récolte.</div>
+  <div class="cal-wrap"><table class="cal-table">
+    <thead><tr>
+      <th style="min-width:130px;text-align:left;padding-left:6px;">Opération</th>
+      ${mois.map(m=>`<th>${m}</th>`).join('')}
+    </tr></thead>
+    <tbody>${calHTML}</tbody>
+  </table></div>
+  <div class="row-2" style="margin-top:10px;">
+    <div class="field"><label>Nb de récoltes / an ★</label>
+      <div class="row-unit"><input type="number" placeholder="1" min="1" max="12"><span class="unit-label">récoltes/an</span></div></div>
+    <div class="field"><label>Durée floraison → récolte <span class="nsp-btn" onclick="toggleNsp(this)">NSP</span></label>
+      <div class="row-unit"><input type="number" placeholder="16"><span class="unit-label">semaines</span></div></div>
+  </div>
+
+  <div class="sub-section-title">✂️ Taille</div>
+  <div class="cal-wrap"><table class="parc-table">
+    <thead><tr><th>Type</th><th>Pratiquée</th><th>Fréq./an</th><th>Outil</th><th>h/arbre</th><th>Prestataire</th><th>Rémunération</th><th>Dist. km</th></tr></thead>
+    <tbody>
+      <tr><td class="rc">Entretien</td>
+        <td><select><option>Oui</option><option>Non</option></select></td>
+        <td><input type="number" placeholder="1"></td>
+        <td><input type="text" placeholder="Sécateur"></td>
+        <td><input type="number" placeholder="" step="0.5"></td>
+        <td><select><option>Non</option><option>Oui</option></select></td>
+        <td><input type="text" placeholder="€/j ou €/arbre"></td>
+        <td><input type="number" placeholder=""></td></tr>
+      <tr><td class="rc">Fructification</td>
+        <td><select><option>Non</option><option>Oui</option></select></td>
+        <td><input type="number" placeholder=""></td>
+        <td><input type="text" placeholder="Sécateur / cisaille"></td>
+        <td><input type="number" placeholder="" step="0.5"></td>
+        <td><select><option>Non</option><option>Oui</option></select></td>
+        <td><input type="text" placeholder=""></td>
+        <td><input type="number" placeholder=""></td></tr>
+      <tr><td class="rc">Régénération</td>
+        <td><select><option>Non</option><option>Oui</option></select></td>
+        <td><input type="number" placeholder=""></td>
+        <td><input type="text" placeholder="Tronçonneuse"></td>
+        <td><input type="number" placeholder="" step="0.5"></td>
+        <td><select><option>Non</option><option>Oui</option></select></td>
+        <td><input type="text" placeholder=""></td>
+        <td><input type="number" placeholder=""></td></tr>
+      <tr><td class="rc">Élagage</td>
+        <td><select><option>Non</option><option>Oui</option></select></td>
+        <td><input type="number" placeholder=""></td>
+        <td><input type="text" placeholder=""></td>
+        <td><input type="number" placeholder="" step="0.5"></td>
+        <td><select><option>Non</option><option>Oui</option></select></td>
+        <td><input type="text" placeholder=""></td>
+        <td><input type="number" placeholder=""></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="sub-section-title">🧪 Fertilisation & protection</div>
+  <div class="field"><label>Fertilisation ★</label>
+    <div class="radio-group inline">
+      <label class="radio-item sm"><input type="radio" name="ferti_${i}" value="Régulière"> Régulière</label>
+      <label class="radio-item sm"><input type="radio" name="ferti_${i}" value="Occasionnelle"> Occasionnelle</label>
+      <label class="radio-item sm"><input type="radio" name="ferti_${i}" value="Non"> Non</label>
+    </div></div>
+  ${fertiProd}
+  <div class="field" style="margin-top:12px;"><label>Traitements phyto ★</label>
+    <div class="radio-group inline">
+      <label class="radio-item sm"><input type="radio" name="phyto_${i}" value="Oui"> Oui</label>
+      <label class="radio-item sm"><input type="radio" name="phyto_${i}" value="Non"> Non</label>
+    </div></div>
+  ${phytoProd}
+
+  <div class="sub-section-title">💧 Irrigation</div>
+  <div class="field"><label>Mode d'irrigation ★</label>
+    <div class="radio-group inline">
+      <label class="radio-item sm"><input type="radio" name="irrig_${i}" value="Non"> Non</label>
+      <label class="radio-item sm"><input type="radio" name="irrig_${i}" value="GàG"> Goutte à goutte</label>
+      <label class="radio-item sm"><input type="radio" name="irrig_${i}" value="Aspersion"> Aspersion</label>
+      <label class="radio-item sm"><input type="radio" name="irrig_${i}" value="Manuel"> Manuel</label>
+    </div></div>
+  <div class="row-2">
+    <div class="field"><label>Volume eau <span class="nsp-btn" onclick="toggleNsp(this)">NSP</span></label>
+      <div class="row-unit"><input type="number" placeholder="0"><span class="unit-label">m³/an</span></div></div>
+    <div class="field"><label>Source</label>
+      <select><option>—</option><option>Réseau</option><option>Citerne</option><option>Cours d'eau</option><option>Autre</option></select></div>
+  </div>
+
+  <div class="sub-section-title">🧺 Récolte</div>
+  <div class="info-box">Rendement en kg par arbre par récolte. Réf. Roberts-Nkrumah : 50–200 fruits/arbre/an.</div>
+  <div class="cal-wrap"><table class="parc-table">
+    <thead><tr><th>Niveau</th><th>kg/arbre/récolte ★</th><th>Nb récoltes/an</th><th>kg/arbre/an</th><th>Observations</th></tr></thead>
+    <tbody>
+      <tr><td class="rc">Bonne récolte</td>
+        <td><input type="number" placeholder="" step="0.5"></td>
+        <td><input type="number" placeholder="1"></td>
+        <td><input type="number" placeholder="" step="0.5"></td>
+        <td><input type="text" placeholder=""></td></tr>
+      <tr><td class="rc">Normale ★</td>
+        <td><input type="number" placeholder="" step="0.5"></td>
+        <td><input type="number" placeholder="1"></td>
+        <td><input type="number" placeholder="" step="0.5"></td>
+        <td><input type="text" placeholder=""></td></tr>
+      <tr><td class="rc">Mauvaise</td>
+        <td><input type="number" placeholder="" step="0.5"></td>
+        <td><input type="number" placeholder="1"></td>
+        <td><input type="number" placeholder="" step="0.5"></td>
+        <td><input type="text" placeholder=""></td></tr>
+    </tbody>
+  </table></div>
+  <div class="cal-wrap" style="margin-top:10px;"><table class="parc-table">
+    <thead><tr><th>Paramètre</th><th>Valeur</th></tr></thead>
+    <tbody>
+      <tr><td class="rc">Mode principal ★</td>
+        <td><select style="width:100%;border:1px solid #ccc;border-radius:5px;padding:5px 6px;font-size:12px;background:white;">
+          <option>Manuel (main / perche / échelle)</option><option>Mécanisé</option><option>Mixte</option>
+        </select></td></tr>
+      <tr><td class="rc">Temps de récolte ★</td>
+        <td><input type="text" placeholder="h/arbre/récolte ou j/an" style="width:100%;border:1px solid #ccc;border-radius:5px;padding:5px 6px;font-size:12px;background:white;"></td></tr>
+      <tr><td class="rc">Nb personnes ★</td>
+        <td><input type="number" placeholder="" style="width:100%;border:1px solid #ccc;border-radius:5px;padding:5px 6px;font-size:12px;background:white;"></td></tr>
+      <tr><td class="rc">Type de MO ★</td>
+        <td><select style="width:100%;border:1px solid #ccc;border-radius:5px;padding:5px 6px;font-size:12px;background:white;">
+          <option>Familiale</option><option>Salariée</option><option>Entraide</option><option>Prestataire</option>
+        </select></td></tr>
+      <tr><td class="rc">Rémunération prestataire</td>
+        <td><input type="text" placeholder="€/jour ou €/arbre ou % récolte" style="width:100%;border:1px solid #ccc;border-radius:5px;padding:5px 6px;font-size:12px;background:white;"></td></tr>
+      <tr><td class="rc">Distance prestataire ↔ parcelle</td>
+        <td><input type="number" placeholder="km" style="width:100%;border:1px solid #ccc;border-radius:5px;padding:5px 6px;font-size:12px;background:white;"></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="sub-section-title">🛒 Utilisation</div>
+  <div class="info-box">Tous les champs facultatifs.</div>
+  <div class="cal-wrap"><table class="util-table">
+    <thead><tr><th>Canal</th><th>% ou kg/an</th><th>Produit</th><th>Détail</th></tr></thead>
+    <tbody>
+      <tr><td class="uc">Autoconsommation</td><td><input type="number" placeholder="%" min="0" max="100"></td>
+        <td><select><option>Frais</option><option>Transformé</option><option>Mixte</option></select></td><td><input type="text"></td></tr>
+      <tr><td class="uc">Dons — famille</td><td><input type="number" placeholder="%" min="0" max="100"></td>
+        <td><select><option>Frais</option><option>Transformé</option><option>Mixte</option></select></td><td><input type="text" placeholder="Lien, fréquence..."></td></tr>
+      <tr><td class="uc">Dons — voisins / asso</td><td><input type="number" placeholder="%" min="0" max="100"></td>
+        <td><select><option>Frais</option><option>Transformé</option></select></td><td><input type="text"></td></tr>
+      <tr><td class="uc">Vente</td><td><input type="number" placeholder="%" min="0" max="100"></td>
+        <td><select><option>Frais</option><option>Transformé</option><option>Mixte</option></select></td><td><input type="text"></td></tr>
+      <tr><td class="uc">Pertes / déchets</td><td><input type="number" placeholder="%" min="0" max="100"></td>
+        <td><select><option>Frais</option><option>Compost</option></select></td><td><input type="text"></td></tr>
+    </tbody>
+  </table></div>
+  <div class="cal-wrap" style="margin-top:10px;"><table class="util-table">
+    <thead><tr><th>Produit</th><th>Prix moyen ★</th><th>Prix bas</th><th>Prix haut</th><th>Qui fixe ★</th><th>Saisonnier ★</th></tr></thead>
+    <tbody>
+      <tr><td class="uc">Fruits frais</td>
+        <td><input type="text" placeholder="€/kg"></td><td><input type="number" placeholder=""></td><td><input type="number" placeholder=""></td>
+        <td><select><option>Producteur</option><option>Marché</option><option>Acheteur</option><option>NSP</option></select></td>
+        <td><select><option>Non</option><option>Oui</option></select></td></tr>
+      <tr><td class="uc">Transformé</td>
+        <td><input type="text" placeholder="€/kg"></td><td><input type="number" placeholder=""></td><td><input type="number" placeholder=""></td>
+        <td><select><option>Producteur</option><option>Marché</option><option>Acheteur</option><option>NSP</option></select></td>
+        <td><select><option>Non</option><option>Oui</option></select></td></tr>
+    </tbody>
+  </table></div>
+  `;
+}
+
+function buildParcelles() {
+  const tb = document.getElementById('parc-tbody');
+  const cultures = ['Arboriculture','Maraîchage','Aromatiques','Autre'];
+  for (let i = 1; i <= 10; i++) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="num">${i}</td>
+      <td><input type="text" placeholder="P${i}"></td>
+      <td><input type="number" placeholder="0.0" step="0.1" min="0"></td>
+      <td><select><option value="">—</option>${cultures.map(c=>`<option>${c}</option>`).join('')}</select></td>
+      <td><input type="text" placeholder="Espèce"></td><td><input type="number" placeholder="0" min="0"></td>
+      <td><input type="text" placeholder="Espèce"></td><td><input type="number" placeholder="0" min="0"></td>
+      <td><input type="text" placeholder="Espèce"></td><td><input type="number" placeholder="0" min="0"></td>
+      <td><input type="text" placeholder="Notes"></td>`;
+    tb.appendChild(tr);
+  }
+}
+
+function buildArbres() {
+  const container = document.getElementById('arbres-container');
+  for (let i = 1; i <= 5; i++) {
+    const div = document.createElement('div');
+    div.className = 'arbre-block';
+    div.innerHTML = `
+      <div class="arbre-header" onclick="toggleArbre(this)">
+        <span>🌿 Arbre - variété ${i}</span><span class="ti">▼</span>
+      </div>
+      <div class="arbre-body ${i===1?'open':''}">${arbreContent(i)}</div>`;
+    container.appendChild(div);
+  }
+}
+
+function toggleArbre(h){ h.classList.toggle('open'); h.nextElementSibling.classList.toggle('open'); }
+
+function renderStep() {
+  document.querySelectorAll('.step').forEach((s,i)=>s.classList.toggle('active',i===currentStep));
+  document.querySelectorAll('.pill').forEach((p,i)=>{p.classList.remove('active','done');if(i===currentStep)p.classList.add('active');else if(i<currentStep)p.classList.add('done');});
+  const pct=Math.round(((currentStep+1)/TOTAL_STEPS)*100);
+  document.getElementById('progress-bar').style.width=pct+'%';
+  document.getElementById('step-label').textContent=`Étape ${currentStep+1} / ${TOTAL_STEPS}`;
+  document.getElementById('btn-prev').style.display=currentStep===0?'none':'block';
+  const bn=document.getElementById('btn-next');
+  bn.textContent=currentStep===TOTAL_STEPS-1?'💾 Enregistrer':'Suivant →';
+  bn.className='btn '+(currentStep===TOTAL_STEPS-1?'btn-send':'btn-next');
+  window.scrollTo(0,0);
+}
+function nextStep(){if(currentStep<TOTAL_STEPS-1){currentStep++;renderStep();saveData();}else{saveData();showToast('✅ Données enregistrées !');}}
+function prevStep(){if(currentStep>0){currentStep--;renderStep();}}
+function goTo(i){currentStep=i;renderStep();saveData();}
+function toggleNsp(btn){
+  btn.classList.toggle('active');
+  const input=btn.closest('.field').querySelector('input:not([type=radio]):not([type=checkbox]),select,textarea');
+  if(!input)return;
+  if(btn.classList.contains('active')){input.dataset.prev=input.value;input.value='NSP';input.disabled=true;}
+  else{input.value=input.dataset.prev||'';input.disabled=false;}
+}
+function saveData(){
+  try{const d={};document.querySelectorAll('[id]').forEach(el=>{if(el.id&&el.tagName.match(/INPUT|SELECT|TEXTAREA/))d[el.id]=el.value;});document.querySelectorAll('input[type=radio]:checked').forEach(el=>{d['r_'+el.name]=el.value;});localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}
+}
+function loadData(){
+  try{const raw=localStorage.getItem(KEY);if(!raw)return;const d=JSON.parse(raw);Object.entries(d).forEach(([k,v])=>{if(k.startsWith('r_')){const el=document.querySelector(`input[type=radio][name="${k.slice(2)}"][value="${v}"]`);if(el)el.checked=true;}else{const el=document.getElementById(k);if(el)el.value=v;}});}catch(e){}
+}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+setInterval(()=>{saveData();showToast('💾 Sauvegarde auto...');},60000);
+window.addEventListener('DOMContentLoaded',()=>{buildParcelles();buildArbres();loadData();renderStep();});
+</script>
+</body>
+</html>
